@@ -3,7 +3,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v3.2.0
+  rev: v4.0.1
   hooks:
   - id: trailing-whitespace
   - id: end-of-file-fixer
@@ -14,7 +14,7 @@ repos:
   - id: check-yaml
   - id: mixed-line-ending
 - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-  rev: 2.3.5
+  rev: 2.3.54
   hooks:
   - id: editorconfig-checker
     types_or:
@@ -24,7 +24,7 @@ repos:
   hooks:
   - id: shellcheck
 - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-  rev: 0.0.11    # or specific tag
+  rev: 0.1.0    # or specific tag
   hooks:
   - id: yamlfmt
     args: [--mapping, '2', --sequence, '2', --offset, '0']
