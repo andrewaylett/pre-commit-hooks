@@ -1,0 +1,8 @@
+---
+- id: npm-test
+  name: Run NPM tests
+  always_run: true
+  require_serial: true
+  pass_filenames: false
+  language: script
+  entry: npm-test
