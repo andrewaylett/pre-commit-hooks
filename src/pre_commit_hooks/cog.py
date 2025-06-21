@@ -1,37 +1,24 @@
-import shutil
-import subprocess
 import sys
 from pathlib import Path
 from cogapp import Cog
+import python_ripgrep
 
 
 def find_cog_files() -> list[str]:
     """Find all files containing the '[[[cog' marker."""
     try:
-        # Check if ripgrep is available
-        rg_path = shutil.which("rg")
-        if not rg_path:
-            print(
-                "Error: ripgrep (rg) is not installed or not in PATH", file=sys.stderr
-            )
-            return []
+        # Use python-ripgrep to find files with the [[[cog marker
+        search_results = python_ripgrep.search([r"\[\[\[cog"], ["."])
 
-        # Use ripgrep to find files with the [[[cog marker
-        # Use --type-not=py to exclude Python files that might have the marker in comments
-        # Then explicitly include Python files with the marker in a code context
-        cmd = [rg_path, "-l", "\\[\\[\\[cog", "."]
-        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        # Extract unique file paths from the search results
+        # The search results are strings in the format "file_path:line_number:line_content"
+        files = set()
+        for result in search_results:
+            # Extract the file path (everything before the first colon)
+            file_path = result.split(":", 1)[0]
+            files.add(file_path)
 
-        if (
-            result.returncode != 0 and result.returncode != 1
-        ):  # rg returns 1 when no matches found
-            print(f"Error running ripgrep: {result.stderr}", file=sys.stderr)
-            return []
-
-        # Extract file paths from results
-        files = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-
-        # Exclude our own implementation file
+        # Convert to list and exclude our own implementation file
         current_file = Path(__file__).resolve()
         files = [f for f in files if Path(f).resolve() != current_file]
 
