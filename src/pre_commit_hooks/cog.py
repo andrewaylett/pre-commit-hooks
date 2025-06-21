@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
-from cogapp import Cog
+
 import python_ripgrep
+from cogapp import Cog
 
 
 def find_cog_files() -> list[str]:
@@ -45,32 +46,32 @@ def run_cog_on_files(files: list[str]) -> bool:
 
     # Set options equivalent to command-line flags
     cog_instance.options.replaceCode = True  # -r: replace in-place
-    cog_instance.options.checksum = True     # -c: checksum
+    cog_instance.options.checksum = True  # -c: checksum
 
     # Add imports to globals (equivalent to -p option)
     cog_instance.options.defines = {
-        'subprocess': __import__('subprocess'),
-        'sp': __import__('subprocess'),
-        're': __import__('re'),
-        'os': __import__('os'),
-        'sys': __import__('sys'),
-        'pathlib': __import__('pathlib'),
-        'pl': __import__('pathlib'),
-        'cog': __import__('cogapp.cogapp')
+        "subprocess": __import__("subprocess"),
+        "sp": __import__("subprocess"),
+        "re": __import__("re"),
+        "os": __import__("os"),
+        "sys": __import__("sys"),
+        "pathlib": __import__("pathlib"),
+        "pl": __import__("pathlib"),
+        "cog": __import__("cogapp.cogapp"),
     }
 
     for file in files:
         try:
             # Process the file using the Cog instance
             # Read the file content
-            with open(file, 'r') as f:
+            with open(file) as f:
                 content = f.read()
 
             # Process the content using process_string
             processed_content = cog_instance.process_string(content)
 
             # Write the processed content back to the file
-            with open(file, 'w') as f:
+            with open(file, "w") as f:
                 f.write(processed_content)
         except Exception as e:
             print(f"Error processing {file}: {e}", file=sys.stderr)
