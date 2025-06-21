@@ -25,3 +25,23 @@ repos:
   hooks:
     - id: cog
 ```
+
+## Development
+
+### Running Tests
+
+This project uses pytest for testing. To run the tests:
+
+1. Install development dependencies:
+   ```bash
+   uv pip install -e ".[dev]"
+   ```
+
+2. Run the tests:
+   ```bash
+   uv run pytest
+   ```
+
+The test suite includes:
+- Tests for the pre-commit hook functionality
+- Tests for cog-generated content
