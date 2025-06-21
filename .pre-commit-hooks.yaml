@@ -1,0 +1,7 @@
+- id: cog
+  name: cog (regenerate files)
+  description: Find files with cog markers and run cog on them
+  entry: pre-commit-hooks
+  language: python
+  pass_filenames: false
+  always_run: true

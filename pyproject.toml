@@ -1,0 +1,43 @@
+[project]
+name = "pre-commit-hooks"
+version = "0.1.0"
+description = "Andrew's pre-commit hooks"
+readme = "README.md"
+authors = [
+  { name = "Andrew Aylett", email = "andrew@aylett.co.uk" }
+]
+requires-python = ">=3.13"
+dependencies = [
+  "cogapp>=3.5.1",
+  "python-ripgrep>=0.0.8",
+]
+
+[dependency-groups]
+dev = [
+  "ruff>=0.12.0",
+]
+
+[tool.ruff.lint]
+select = [
+  # pycodestyle
+  "E4", "E7", "E9",
+  # Pyflakes
+  "F",
+  # pyupgrade
+  "UP",
+  # flake8-bugbear
+  "B",
+  # flake8-simplify
+  "SIM",
+  # Ruff
+  "RUF",
+  # isort
+  "I",
+]
+
+[project.scripts]
+pre-commit-hooks = "pre_commit_hooks:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
