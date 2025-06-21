@@ -2,6 +2,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from cogapp import Cog
 
 
 def find_cog_files() -> list[str]:
@@ -52,27 +53,38 @@ def run_cog_on_files(files: list[str]) -> bool:
     print(f"Running cog on {len(files)} files...")
     success = True
 
+    # Create a Cog instance with the appropriate options
+    cog_instance = Cog()
+
+    # Set options equivalent to command-line flags
+    cog_instance.options.replaceCode = True  # -r: replace in-place
+    cog_instance.options.checksum = True     # -c: checksum
+
+    # Add imports to globals (equivalent to -p option)
+    cog_instance.options.defines = {
+        'subprocess': __import__('subprocess'),
+        'sp': __import__('subprocess'),
+        're': __import__('re'),
+        'os': __import__('os'),
+        'sys': __import__('sys'),
+        'pathlib': __import__('pathlib'),
+        'pl': __import__('pathlib'),
+        'cog': __import__('cogapp.cogapp')
+    }
+
     for file in files:
         try:
-            # Use subprocess to run cog on each file
-            # -r: replace in-place
-            # -c: checksum (only update if output would be different)
-            # -p: add these imports to the globals
-            cmd = [
-                sys.executable,
-                "-m",
-                "cogapp",
-                "-r",
-                "-c",
-                "-p",
-                "import subprocess as sp, re, os, sys, pathlib as pl, cog",
-                file,
-            ]
-            result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+            # Process the file using the Cog instance
+            # Read the file content
+            with open(file, 'r') as f:
+                content = f.read()
 
-            if result.returncode != 0:
-                print(f"Error processing {file}: {result.stderr}", file=sys.stderr)
-                success = False
+            # Process the content using process_string
+            processed_content = cog_instance.process_string(content)
+
+            # Write the processed content back to the file
+            with open(file, 'w') as f:
+                f.write(processed_content)
         except Exception as e:
             print(f"Error processing {file}: {e}", file=sys.stderr)
             success = False
