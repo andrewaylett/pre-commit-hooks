@@ -9,19 +9,6 @@ This document provides guidelines and instructions for developing and maintainin
 - Python 3.13 or higher
 - [uv](https://github.com/astral-sh/uv) for package management
 
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/andrewaylett/pre-commit-hooks.git
-   cd pre-commit-hooks
-   ```
-
-2. Install the package in development mode:
-   ```bash
-   uv pip install -e ".[dev]"
-   ```
-
 ### Project Structure
 
 - `src/pre_commit_hooks/`: Source code for the pre-commit hooks
@@ -108,17 +95,6 @@ The hook is designed to:
 ### Python Version
 
 The project requires Python 3.13 or higher, as specified in the `pyproject.toml` file.
-
-### Distribution
-
-The project is configured to be built with hatchling. To build a distribution:
-
-```bash
-uv pip install build
-python -m build
-```
-
-This will create both wheel and source distributions in the `dist/` directory.
 
 ### Testing pre-commit hooks
 
