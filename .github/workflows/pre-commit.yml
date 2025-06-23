@@ -19,7 +19,7 @@ jobs:
       with:
         cache: pip
         python-version-file: .python-version
-    - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+    - uses: andrewaylett/pre-commit-action@v4
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@v6
       with:
