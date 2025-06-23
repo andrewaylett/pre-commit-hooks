@@ -1,11 +1,18 @@
 """Tests for the cog pre-commit hook using simulated repositories."""
 
+import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
 import pytest
+
+
+@pytest.fixture
+def project_dir():
+    """Return the absolute path to the project directory."""
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
 @pytest.fixture
@@ -52,7 +59,7 @@ repos:
 
     # Install pre-commit
     subprocess.run(
-        ["pre-commit", "install"], cwd=temp_dir, check=True, capture_output=True
+        ["uvx", "pre-commit", "install"], cwd=temp_dir, check=True, capture_output=True
     )
 
     return temp_dir
@@ -101,7 +108,7 @@ def create_file():
     return _create_file
 
 
-def test_passing_repository(git_repo, passing_content, create_file):
+def test_passing_repository(git_repo, passing_content, create_file, project_dir):
     """Test that a repository with correctly generated cog content passes the pre-commit check."""
     # Create a file with cog markers and correctly generated content
     create_file(passing_content, git_repo, "with_cog.py")
@@ -111,9 +118,9 @@ def test_passing_repository(git_repo, passing_content, create_file):
         ["git", "add", "with_cog.py"], cwd=git_repo, check=True, capture_output=True
     )
 
-    # Run pre-commit
+    # Run pre-commit try-repo
     result = subprocess.run(
-        ["pre-commit", "run", "--all-files"],
+        ["uvx", "pre-commit", "try-repo", project_dir, "cog", "--all-files"],
         cwd=git_repo,
         capture_output=True,
         text=True,
@@ -124,7 +131,7 @@ def test_passing_repository(git_repo, passing_content, create_file):
     assert "Passed" in result.stdout
 
 
-def test_failing_repository(git_repo, failing_content, create_file):
+def test_failing_repository(git_repo, failing_content, create_file, project_dir):
     """Test that a repository with incorrectly generated cog content gets fixed by the pre-commit hook."""
     # Create a file with cog markers and incorrectly generated content
     cog_file = create_file(failing_content, git_repo, "with_cog.py")
@@ -138,9 +145,17 @@ def test_failing_repository(git_repo, failing_content, create_file):
         ["git", "add", "with_cog.py"], cwd=git_repo, check=True, capture_output=True
     )
 
-    # Run pre-commit with verbose output
+    # Run pre-commit try-repo with verbose output
     result = subprocess.run(
-        ["pre-commit", "run", "--all-files", "--verbose"],
+        [
+            "uvx",
+            "pre-commit",
+            "try-repo",
+            project_dir,
+            "cog",
+            "--all-files",
+            "--verbose",
+        ],
         cwd=git_repo,
         capture_output=True,
         text=True,
@@ -149,8 +164,10 @@ def test_failing_repository(git_repo, failing_content, create_file):
     print(f"Pre-commit stdout: {result.stdout}")
     print(f"Pre-commit stderr: {result.stderr}")
 
-    # Check that pre-commit passed
-    assert result.returncode == 0, f"Pre-commit failed with error: {result.stderr}"
+    # Check that pre-commit ran successfully (may return non-zero if files were modified)
+    assert (
+        "files were modified by this hook" in result.stdout or result.returncode == 0
+    ), f"Pre-commit failed with error: {result.stderr}"
 
     # Run cog directly on the file to verify it works
     cmd = [
@@ -184,7 +201,9 @@ def test_failing_repository(git_repo, failing_content, create_file):
     )
 
 
-def test_mixed_repository(git_repo, passing_content, failing_content, create_file):
+def test_mixed_repository(
+    git_repo, passing_content, failing_content, create_file, project_dir
+):
     """Test a repository with both passing and failing files."""
     # Create a file with cog markers and correctly generated content
     passing_file = create_file(passing_content, git_repo, "passing.py")
@@ -208,9 +227,17 @@ def test_mixed_repository(git_repo, passing_content, failing_content, create_fil
         capture_output=True,
     )
 
-    # Run pre-commit with verbose output
+    # Run pre-commit try-repo with verbose output
     result = subprocess.run(
-        ["pre-commit", "run", "--all-files", "--verbose"],
+        [
+            "uvx",
+            "pre-commit",
+            "try-repo",
+            project_dir,
+            "cog",
+            "--all-files",
+            "--verbose",
+        ],
         cwd=git_repo,
         capture_output=True,
         text=True,
@@ -219,8 +246,10 @@ def test_mixed_repository(git_repo, passing_content, failing_content, create_fil
     print(f"Pre-commit stdout: {result.stdout}")
     print(f"Pre-commit stderr: {result.stderr}")
 
-    # Check that pre-commit passed
-    assert result.returncode == 0, f"Pre-commit failed with error: {result.stderr}"
+    # Check that pre-commit ran successfully (may return non-zero if files were modified)
+    assert (
+        "files were modified by this hook" in result.stdout or result.returncode == 0
+    ), f"Pre-commit failed with error: {result.stderr}"
 
     # Run cog directly on the failing file to verify it works
     cmd = [
