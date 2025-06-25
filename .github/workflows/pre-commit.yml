@@ -21,7 +21,7 @@ jobs:
         python-version-file: .python-version
     - uses: andrewaylett/pre-commit-action@48eca5202bc34e171742aecb8d191dfc8d231657 # v4
     - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@445689ea25e0de0a23313031f5fe577c74ae45a1 # v6
+      uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
       with:
         enable-cache: true
     - name: Test
