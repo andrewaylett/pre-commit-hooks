@@ -1,30 +1,31 @@
 # Runs Cog as a pre-commit hook
 
-Rather than adding a local pre-commit hook to each of your repositories:
+Add this repo to your `.pre-commit-config.yaml`:
 
-```yaml
+<!-- [[[cog
+result = sp.run(
+    ["git", "describe", "--tags"],
+    capture_output=True,
+    text=True,
+    check=True
+)
+version = result.stdout.strip().split('-')[0]
+cog.outl(f"""```yaml
 repos:
-- repo: local
+- repo: https://github.com/andrewaylett/pre-commit-hooks
+  rev: {version}
   hooks:
-  - # https://github.com/nedbat/cog/issues/21#issuecomment-1919626992
-    id: cog
-    name: cog (regenerate files)
-    language: python
-    additional_dependencies:
-    - cogapp
-    entry: bash -c 'git grep -lzF "[[[""cog" | xargs -0 cog -r -c -p "import subprocess as sp, re, os, sys, pathlib as pl, cog" "$@"'
-    pass_filenames: false
-    always_run: true
-```
-
-We can use this repo to do the same thing:
-
+    - id: cog
+```""")
+]]] -->
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
+  rev: v0.1.0
   hooks:
     - id: cog
 ```
+<!-- [[[end]]] -->
 
 ## Development
 
@@ -32,15 +33,9 @@ repos:
 
 This project uses pytest for testing. To run the tests:
 
-1. Install development dependencies:
-   ```bash
-   uv pip install -e ".[dev]"
-   ```
-
-2. Run the tests:
-   ```bash
-   uv run pytest
-   ```
+```bash
+uv run pytest
+```
 
 The test suite includes:
 - Tests for the pre-commit hook functionality

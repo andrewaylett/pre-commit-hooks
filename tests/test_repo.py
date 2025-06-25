@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
@@ -45,14 +44,6 @@ def git_repo(temp_dir):
     # Create .pre-commit-config.yaml
     pre_commit_config = """
 repos:
--   repo: local
-    hooks:
-    -   id: cog
-        name: cog
-        entry: python -m pre_commit_hooks.cog
-        language: system
-        pass_filenames: false
-        always_run: true
 """
     with open(Path(temp_dir) / ".pre-commit-config.yaml", "w") as f:
         f.write(pre_commit_config)
@@ -70,14 +61,14 @@ def passing_content():
     """Return content for a file with cog markers and correctly generated content."""
     return """
 def example_passing():
-    # [[[cog
+    # [ [ [cog
     # import cog
     # cog.outl("    print('Generated Passing')")
     # ]]]
     print('Generated Passing')
     # [[[end]]]
     pass
-"""
+""".replace("[ [ [", "[[[")
 
 
 @pytest.fixture
@@ -85,14 +76,14 @@ def failing_content():
     """Return content for a file with cog markers and incorrectly generated content."""
     return """
 def example_failing():
-    # [[[cog
+    # [ [ [cog
     # import cog
     # cog.outl("    print('Generated Failing')")
     # ]]]
     print('Wrong content')
     # [[[end]]]
     pass
-"""
+""".replace("[ [ [", "[[[")
 
 
 @pytest.fixture
@@ -113,9 +104,16 @@ def test_passing_repository(git_repo, passing_content, create_file, project_dir)
     # Create a file with cog markers and correctly generated content
     create_file(passing_content, git_repo, "with_cog.py")
 
-    # Add the file to git
+    # Create .cogfiles listing the files to process
+    with open(Path(git_repo) / ".cogfiles", "w") as f:
+        f.write("with_cog.py\n")
+
+    # Add the files to git
     subprocess.run(
-        ["git", "add", "with_cog.py"], cwd=git_repo, check=True, capture_output=True
+        ["git", "add", "with_cog.py", ".cogfiles"],
+        cwd=git_repo,
+        check=True,
+        capture_output=True,
     )
 
     # Run pre-commit try-repo
@@ -140,88 +138,13 @@ def test_failing_repository(git_repo, failing_content, create_file, project_dir)
     with open(cog_file) as f:
         original_content = f.read()
 
-    # Add the file to git
-    subprocess.run(
-        ["git", "add", "with_cog.py"], cwd=git_repo, check=True, capture_output=True
-    )
-
-    # Run pre-commit try-repo with verbose output
-    result = subprocess.run(
-        [
-            "uvx",
-            "pre-commit",
-            "try-repo",
-            project_dir,
-            "cog",
-            "--all-files",
-            "--verbose",
-        ],
-        cwd=git_repo,
-        capture_output=True,
-        text=True,
-    )
-
-    print(f"Pre-commit stdout: {result.stdout}")
-    print(f"Pre-commit stderr: {result.stderr}")
-
-    # Check that pre-commit ran successfully (may return non-zero if files were modified)
-    assert (
-        "files were modified by this hook" in result.stdout or result.returncode == 0
-    ), f"Pre-commit failed with error: {result.stderr}"
-
-    # Run cog directly on the file to verify it works
-    cmd = [
-        sys.executable,
-        "-m",
-        "cogapp",
-        "-r",
-        "-c",
-        "-p",
-        "import subprocess as sp, re, os, sys, pathlib as pl, cog",
-        str(cog_file),
-    ]
-    cog_result = subprocess.run(cmd, capture_output=True, text=True, check=False)
-
-    print(f"Cog stdout: {cog_result.stdout}")
-    print(f"Cog stderr: {cog_result.stderr}")
-
-    # Read the file after running cog directly
-    with open(cog_file) as f:
-        processed_content = f.read()
-
-    # Check that the content was updated by running cog directly
-    assert "print('Generated Failing')" in processed_content, (
-        "Cog did not update the content correctly"
-    )
-
-    # Since we've verified that cog works directly, we'll skip the assertion that was failing
-    # and focus on verifying that the content was changed
-    assert original_content != processed_content, (
-        "Content was not changed by running cog directly"
-    )
-
-
-def test_mixed_repository(
-    git_repo, passing_content, failing_content, create_file, project_dir
-):
-    """Test a repository with both passing and failing files."""
-    # Create a file with cog markers and correctly generated content
-    passing_file = create_file(passing_content, git_repo, "passing.py")
-
-    # Save the original passing content for comparison
-    with open(passing_file) as f:
-        original_passing = f.read()
-
-    # Create a file with cog markers and incorrectly generated content
-    failing_file = create_file(failing_content, git_repo, "failing.py")
-
-    # Save the original failing content for comparison
-    with open(failing_file) as f:
-        original_failing = f.read()
+    # Create .cogfiles listing the files to process
+    with open(Path(git_repo) / ".cogfiles", "w") as f:
+        f.write("with_cog.py\n")
 
     # Add the files to git
     subprocess.run(
-        ["git", "add", "passing.py", "failing.py"],
+        ["git", "add", "with_cog.py", ".cogfiles"],
         cwd=git_repo,
         check=True,
         capture_output=True,
@@ -251,21 +174,73 @@ def test_mixed_repository(
         "files were modified by this hook" in result.stdout or result.returncode == 0
     ), f"Pre-commit failed with error: {result.stderr}"
 
-    # Run cog directly on the failing file to verify it works
-    cmd = [
-        sys.executable,
-        "-m",
-        "cogapp",
-        "-r",
-        "-c",
-        "-p",
-        "import subprocess as sp, re, os, sys, pathlib as pl, cog",
-        str(failing_file),
-    ]
-    cog_result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    # Read the file after running cog
+    with open(cog_file) as f:
+        processed_content = f.read()
 
-    print(f"Cog stdout: {cog_result.stdout}")
-    print(f"Cog stderr: {cog_result.stderr}")
+    # Check that the content was updated by running cog
+    assert "print('Generated Failing')" in processed_content, (
+        "Cog did not update the content correctly"
+    )
+
+    assert original_content != processed_content, (
+        "Content was not changed by running cog"
+    )
+
+
+def test_mixed_repository(
+    git_repo, passing_content, failing_content, create_file, project_dir
+):
+    """Test a repository with both passing and failing files."""
+    # Create a file with cog markers and correctly generated content
+    passing_file = create_file(passing_content, git_repo, "passing.py")
+
+    # Save the original passing content for comparison
+    with open(passing_file) as f:
+        original_passing = f.read()
+
+    # Create a file with cog markers and incorrectly generated content
+    failing_file = create_file(failing_content, git_repo, "failing.py")
+
+    # Save the original failing content for comparison
+    with open(failing_file) as f:
+        original_failing = f.read()
+
+    # Create .cogfiles listing the files to process
+    with open(Path(git_repo) / ".cogfiles", "w") as f:
+        f.write("passing.py\nfailing.py\n")
+
+    # Add the files to git
+    subprocess.run(
+        ["git", "add", "passing.py", "failing.py", ".cogfiles"],
+        cwd=git_repo,
+        check=True,
+        capture_output=True,
+    )
+
+    # Run pre-commit try-repo with verbose output
+    result = subprocess.run(
+        [
+            "uvx",
+            "pre-commit",
+            "try-repo",
+            project_dir,
+            "cog",
+            "--all-files",
+            "--verbose",
+        ],
+        cwd=git_repo,
+        capture_output=True,
+        text=True,
+    )
+
+    print(f"Pre-commit stdout: {result.stdout}")
+    print(f"Pre-commit stderr: {result.stderr}")
+
+    # Check that pre-commit ran successfully (may return non-zero if files were modified)
+    assert (
+        "files were modified by this hook" in result.stdout or result.returncode == 0
+    ), f"Pre-commit failed with error: {result.stderr}"
 
     # Read the files after running cog directly
     with open(passing_file) as f:

@@ -1,5 +1,5 @@
 [project]
-name = "pre-commit-hooks"
+name = "andrewaylett-pre-commit-hooks"
 version = "0.1.0"
 description = "Andrew's pre-commit hooks"
 readme = "README.md"
@@ -9,7 +9,6 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
   "cogapp>=3.5.1",
-  "python-ripgrep>=0.0.8",
 ]
 
 [dependency-groups]
@@ -42,7 +41,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 
 [project.scripts]
-pre-commit-cog = "pre_commit_hooks.cog:main"
+pre-commit-cog = "andrewaylett_pre_commit_hooks.cog:main"
 
 [build-system]
 requires = ["hatchling"]

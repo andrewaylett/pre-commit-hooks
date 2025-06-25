@@ -26,50 +26,6 @@ The project uses pytest for testing. To run all tests:
 uv run pytest
 ```
 
-To run a specific test file:
-
-```bash
-uv run pytest tests/test_file.py
-```
-
-To run tests with verbose output:
-
-```bash
-uv run pytest -v
-```
-
-### Adding New Tests
-
-1. Create a new test file in the `tests/` directory with a name starting with `test_`.
-2. Import pytest and the modules you want to test.
-3. Write test functions with names starting with `test_`.
-
-#### Example Test with Cog
-
-Here's an example of a test that uses cog to generate code:
-
-```python
-"""Example test file to demonstrate testing with cog."""
-
-import pytest
-
-def example_function_with_cog():
-    """Example function with cog-generated content."""
-    # [[[cog
-    # import cog
-    # numbers = [1, 2, 3, 4, 5]
-    # cog.outl("    result = sum([" + ", ".join(str(n) for n in numbers) + "])")
-    # ]]]
-    result = sum([1, 2, 3, 4, 5])
-    # [[[end]]]
-    return result
-
-def test_example_function_with_cog():
-    """Test that the example function returns the expected value."""
-    result = example_function_with_cog()
-    assert result == 15
-```
-
 ## Additional Development Information
 
 ### How Cog Works
