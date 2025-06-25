@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from pre_commit_hooks.cog import find_cog_files, main, run_cog_on_files
+from andrewaylett_pre_commit_hooks.cog import find_cog_files, main, run_cog_on_files
 
 
 @pytest.fixture
@@ -24,14 +24,14 @@ def cog_content():
     """Return content for a file with cog markers."""
     return """
 def example():
-    # [[[cog
+    # [ [ [cog
     # import cog
     # cog.outl("    print('Generated')")
     # ]]]
     # Content will be generated here
     # [[[end]]]
     pass
-"""
+""".replace("[ [ [", "[[[")
 
 
 @pytest.fixture
@@ -62,20 +62,75 @@ def no_cog_file(temp_dir, no_cog_content):
     return file_path
 
 
-def test_find_cog_files(temp_dir, cog_file, no_cog_file):
-    """Test that find_cog_files correctly identifies files with cog markers."""
+@pytest.fixture
+def cogfiles_content():
+    """Return content for a .cogfiles file."""
+    return """
+with_cog.py
+"""
+
+
+@pytest.fixture
+def cogfiles_file(temp_dir, cogfiles_content):
+    """Create a .cogfiles file in the temporary directory."""
+    file_path = Path(temp_dir) / ".cogfiles"
+    with open(file_path, "w") as f:
+        f.write(cogfiles_content)
+    return file_path
+
+
+@pytest.fixture
+def readme_md_file(temp_dir, cog_content):
+    """Create a README.md file in the temporary directory."""
+    file_path = Path(temp_dir) / "README.md"
+    with open(file_path, "w") as f:
+        f.write(cog_content)
+    return file_path
+
+
+@pytest.fixture
+def readme_file(temp_dir, cog_content):
+    """Create a README file in the temporary directory."""
+    file_path = Path(temp_dir) / "README"
+    with open(file_path, "w") as f:
+        f.write(cog_content)
+    return file_path
+
+
+def test_find_cog_files_with_cogfiles(temp_dir, cogfiles_file, cog_file):
+    """Test that find_cog_files correctly uses .cogfiles."""
     # Find cog files
     files = find_cog_files()
 
-    # Check that only the file with cog markers is found
+    # Check that the files listed in .cogfiles are found
     assert len(files) == 1
-    assert Path(files[0]).name == "with_cog.py"
+    assert "with_cog.py" in files
+
+
+def test_find_cog_files_with_readme_md(temp_dir, readme_md_file):
+    """Test that find_cog_files correctly uses README.md when .cogfiles doesn't exist."""
+    # Find cog files
+    files = find_cog_files()
+
+    # Check that only README.md is found
+    assert len(files) == 1
+    assert "README.md" in files
+
+
+def test_find_cog_files_with_readme(temp_dir, readme_file):
+    """Test that find_cog_files correctly uses README when .cogfiles and README.md don't exist."""
+    # Find cog files
+    files = find_cog_files()
+
+    # Check that only README is found
+    assert len(files) == 1
+    assert "README" in files
 
 
 def test_run_cog_on_files(cog_file):
     """Test that run_cog_on_files correctly processes files with cog markers."""
     # Run cog on the file
-    success = run_cog_on_files([str(cog_file)])
+    success = run_cog_on_files({str(cog_file)})
 
     # Check that cog ran successfully
     assert success is True
@@ -88,13 +143,39 @@ def test_run_cog_on_files(cog_file):
     assert "print('Generated')" in processed_content
 
 
-def test_main_with_temp_files(temp_dir, cog_file):
-    """Test the main function with temporary files."""
+def test_main_with_cogfiles(temp_dir, cog_file, cogfiles_file):
+    """Test the main function with .cogfiles."""
     # Run the main function
     main()
 
     # Read the processed file
     with open(cog_file) as f:
+        processed_content = f.read()
+
+    # Check that the cog-generated content is present
+    assert "print('Generated')" in processed_content
+
+
+def test_main_with_readme_md(temp_dir, readme_md_file):
+    """Test the main function with README.md."""
+    # Run the main function
+    main()
+
+    # Read the processed file
+    with open(readme_md_file) as f:
+        processed_content = f.read()
+
+    # Check that the cog-generated content is present
+    assert "print('Generated')" in processed_content
+
+
+def test_main_with_readme(temp_dir, readme_file):
+    """Test the main function with README."""
+    # Run the main function
+    main()
+
+    # Read the processed file
+    with open(readme_file) as f:
         processed_content = f.read()
 
     # Check that the cog-generated content is present

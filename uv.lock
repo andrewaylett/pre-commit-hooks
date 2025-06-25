@@ -3,6 +3,31 @@ revision = 2
 requires-python = ">=3.13"
 
 [[package]]
+name = "andrewaylett-pre-commit-hooks"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "cogapp" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "cogapp", specifier = ">=3.5.1" }]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pre-commit", specifier = ">=4.2.0" },
+    { name = "pytest", specifier = ">=7.4.0" },
+    { name = "ruff", specifier = ">=0.12.0" },
+]
+
+[[package]]
 name = "cfgv"
 version = "3.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -118,35 +143,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pre-commit-hooks"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "cogapp" },
-    { name = "python-ripgrep" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "cogapp", specifier = ">=3.5.1" },
-    { name = "python-ripgrep", specifier = ">=0.0.8" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pre-commit", specifier = ">=4.2.0" },
-    { name = "pytest", specifier = ">=7.4.0" },
-    { name = "ruff", specifier = ">=0.12.0" },
-]
-
-[[package]]
 name = "pygments"
 version = "2.19.2"
 source = { registry = "https://pypi.org/simple" }
@@ -169,28 +165,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/08/ba/45911d754e8eba3d5a841a5ce61a65a685ff1798421ac054f85aa8747dfb/pytest-8.4.1.tar.gz", hash = "sha256:7c67fd69174877359ed9371ec3af8a3d2b04741818c51e5e99cc1742251fa93c", size = 1517714, upload-time = "2025-06-18T05:48:06.109Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/29/16/c8a903f4c4dffe7a12843191437d7cd8e32751d5de349d45d3fe69544e87/pytest-8.4.1-py3-none-any.whl", hash = "sha256:539c70ba6fcead8e78eebbf1115e8b589e7565830d7d006a8723f19ac8a0afb7", size = 365474, upload-time = "2025-06-18T05:48:03.955Z" },
-]
-
-[[package]]
-name = "python-ripgrep"
-version = "0.0.8"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b4/af/c7000c2076169b2420790792bed5a9699280c6ba9865b4e07d725801cf5f/python_ripgrep-0.0.8.tar.gz", hash = "sha256:ebb0f4618c4a15baad524beab636e2b59e87b4ca283ceed0a1026384118d466b", size = 47777, upload-time = "2025-04-02T10:02:22.802Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/42/1c/bb4d91556f7dfe61f3d4b9e11b788ccbba10f50644d51add1ddc2ee9a5fc/python_ripgrep-0.0.8-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:1a5ba9063d4f6c15bd2c77cb3f5d94af0c550a4530179340dbeaea0a5d55e0dd", size = 1610836, upload-time = "2025-04-02T10:02:12.044Z" },
-    { url = "https://files.pythonhosted.org/packages/cf/ed/f7a0fbc74484ba51d5db4ed3ed1d92668f336fcda63d4ad37a962522410a/python_ripgrep-0.0.8-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:2129ea8a9be97122a437518d3b856ca01b2c83c29b107ffa6dea0f30678ef442", size = 1546093, upload-time = "2025-04-02T10:02:10.294Z" },
-    { url = "https://files.pythonhosted.org/packages/41/93/ec68cd3eed220919dec1b26cd659360c52d9a83483c6a5c55d8aeaaa7026/python_ripgrep-0.0.8-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:727d5066a8dc2c3b60b1b0825727185d1204685c0dc061ceaf489d9255a8ffcf", size = 1734250, upload-time = "2025-04-02T10:01:57.44Z" },
-    { url = "https://files.pythonhosted.org/packages/5b/18/ed444b7ff296f76a764d81eb4785a31c3caad18932d255cceac6f16e6866/python_ripgrep-0.0.8-cp38-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:aac02ab81bd582e3fbc8f7069cd7ebc271c164f38b26c375b1a05af291abc1e0", size = 1681808, upload-time = "2025-04-02T10:01:59.616Z" },
-    { url = "https://files.pythonhosted.org/packages/2b/8d/450921470e0a92609027ab9dd2b303d02df20a83b53bff963c50b1f2856f/python_ripgrep-0.0.8-cp38-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:db6e7226e12cf3fce2439bbc7a1483ee30a037c07d1c044d87e420fe93be7614", size = 1828133, upload-time = "2025-04-02T10:02:06.154Z" },
-    { url = "https://files.pythonhosted.org/packages/76/06/0159f1cb044b0cac6c3b040bd4a756f5c04dc0d9e8baccf60f4fcd0e5035/python_ripgrep-0.0.8-cp38-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:8b9cace3e6425442c85426d239249b7a5c7694ee84d5318a607b64de5b2de080", size = 1885529, upload-time = "2025-04-02T10:02:02.012Z" },
-    { url = "https://files.pythonhosted.org/packages/1a/4b/a21970322be689c783aacb11ef8116ae9ad7c3d6d0c0db7db2ae8203b976/python_ripgrep-0.0.8-cp38-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:1a49a13680bb3a8400fb9711983c801c019e33fdd0c93a797baf435309eda7b7", size = 2026866, upload-time = "2025-04-02T10:02:04.238Z" },
-    { url = "https://files.pythonhosted.org/packages/41/62/64f1aac8ff9aa9032da090eb888abe88808e6fb26a04528bd5fe02ae4b2e/python_ripgrep-0.0.8-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:55e214264de03497ff80e768d7c277383c4fba9c2b000a102b132a7430a8453a", size = 1792983, upload-time = "2025-04-02T10:02:08.275Z" },
-    { url = "https://files.pythonhosted.org/packages/36/ce/7345bd5709a846f4bee27a3977474c2bb2252dd891296714636c50c4080a/python_ripgrep-0.0.8-cp38-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:ea68a80096aaefde6dea0054c0e94d868e87f22fe095a69801e86e92c5e6a689", size = 1900790, upload-time = "2025-04-02T10:02:14.215Z" },
-    { url = "https://files.pythonhosted.org/packages/bd/e5/242aef8a2ff28726b4e17dff6b568e94c3c7670e0e14d084334045732ad6/python_ripgrep-0.0.8-cp38-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:18a4dad0122213c01cdb19f8bfb9cd0535c9cd4fecc9a444be77a58088dcb6a6", size = 1943182, upload-time = "2025-04-02T10:02:16.73Z" },
-    { url = "https://files.pythonhosted.org/packages/7d/91/5cf70b5143d90c529bde900d689dc502f088a7efdb0cce253433e7c6fe92/python_ripgrep-0.0.8-cp38-abi3-musllinux_1_2_i686.whl", hash = "sha256:f46fdd232716c371b57977da5753038a95fcc0e0b45a882910987be1802e555f", size = 1925441, upload-time = "2025-04-02T10:02:19.319Z" },
-    { url = "https://files.pythonhosted.org/packages/fc/6a/2b2889cbe36a593ac8bba3f2466d345a61f0d5938109b006b58fa1351d2f/python_ripgrep-0.0.8-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:48be1bff7df234fed96a839022075c75e9c03f0e8c247a55d990a7d448639041", size = 1961355, upload-time = "2025-04-02T10:02:21.454Z" },
-    { url = "https://files.pythonhosted.org/packages/a6/0d/dade61e0617cf36e31f40f4fc8eff7f6715785de60ea68e1493ee4b2606e/python_ripgrep-0.0.8-cp38-abi3-win32.whl", hash = "sha256:d52fffe9a779ae0cabadd24a891d9ba336628291b52812b03fb0fac31f7dd10b", size = 1313589, upload-time = "2025-04-02T10:02:26.183Z" },
-    { url = "https://files.pythonhosted.org/packages/5e/4e/cc99fd63b00ea6e197bfbaaea9e55bb5a3ce0d3ab34ba2ce9ce50b6c0da0/python_ripgrep-0.0.8-cp38-abi3-win_amd64.whl", hash = "sha256:45ca2f4e7f104aee98eaddd9fa58487b7b4c092f61424fa8890bee3a8048efcb", size = 1416790, upload-time = "2025-04-02T10:02:24.422Z" },
 ]
 
 [[package]]
