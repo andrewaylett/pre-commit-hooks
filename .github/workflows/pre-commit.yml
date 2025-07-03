@@ -22,7 +22,7 @@ jobs:
         cache: pip
         python-version-file: .python-version
         cache-dependency-path: uv.lock
-    - uses: andrewaylett/pre-commit-action@ebbd4b7c8a378c1b63bb90d81b520110ca2ea7b5 # v4
+    - uses: andrewaylett/pre-commit-action@ee4ce6f91d051d912bb073002797ff73af77d448 # v4
     - name: Install the latest version of uv
       uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
       with:
