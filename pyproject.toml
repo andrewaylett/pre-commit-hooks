@@ -18,6 +18,9 @@ dev = [
   "ruff>=0.12.0",
   "pre-commit>=4.2.0",
   "pyyaml>=6.0",
+  "pre-commit-uv>=4.1.4",
+  "pytest-xdist>=3.8.0",
+  "pytest-env>=1.1.5",
 ]
 
 [tool.ruff.lint]
@@ -41,6 +44,10 @@ select = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
+addopts = "-n auto --durations=0"
+env = [
+  "FORCE_PRE_COMMIT_UV_PATCH=1"
+]
 
 [project.scripts]
 pre-commit-cog = "andrewaylett_pre_commit_hooks.cog:main"

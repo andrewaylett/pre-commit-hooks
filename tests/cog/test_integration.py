@@ -2,9 +2,11 @@
 
 import os
 import subprocess
+from contextlib import chdir
 from pathlib import Path
 
 import pytest
+from pre_commit.main import main as pre_commit_main
 
 
 @pytest.fixture
@@ -40,11 +42,6 @@ repos:
     with open(Path(temp_dir) / ".pre-commit-config.yaml", "w") as f:
         f.write(pre_commit_config)
 
-    # Install pre-commit
-    subprocess.run(
-        ["uvx", "pre-commit", "install"], cwd=temp_dir, check=True, capture_output=True
-    )
-
     return temp_dir
 
 
@@ -65,17 +62,12 @@ def test_passing_repository(git_repo, passing_cog_content, create_file, project_
         capture_output=True,
     )
 
-    # Run pre-commit try-repo
-    result = subprocess.run(
-        ["uvx", "pre-commit", "try-repo", project_dir, "cog", "--all-files"],
-        cwd=git_repo,
-        capture_output=True,
-        text=True,
-    )
+    with chdir(git_repo):
+        # Run pre-commit try-repo using the module from dev dependencies
+        result = pre_commit_main(["try-repo", project_dir, "cog", "--all-files"])
 
     # Check that pre-commit passed
-    assert result.returncode == 0, f"Pre-commit failed with error: {result.stderr}"
-    assert "Passed" in result.stdout
+    assert result == 0, "Pre-commit failed with error"
 
 
 def test_failing_repository(git_repo, failing_cog_content, create_file, project_dir):
@@ -91,34 +83,12 @@ def test_failing_repository(git_repo, failing_cog_content, create_file, project_
     with open(Path(git_repo) / ".cogfiles", "w") as f:
         f.write("with_cog.py\n")
 
-    # Add the files to git
-    subprocess.run(
-        ["git", "add", "with_cog.py", ".cogfiles"],
-        cwd=git_repo,
-        check=True,
-        capture_output=True,
-    )
+    with chdir(git_repo):
+        # Run pre-commit try-repo using the module from dev dependencies
+        result = pre_commit_main(["try-repo", project_dir, "cog", "--all-files"])
 
-    # Run pre-commit try-repo with verbose output
-    result = subprocess.run(
-        [
-            "uvx",
-            "pre-commit",
-            "try-repo",
-            project_dir,
-            "cog",
-            "--all-files",
-            "--verbose",
-        ],
-        cwd=git_repo,
-        capture_output=True,
-        text=True,
-    )
-
-    # Check that pre-commit ran successfully (may return non-zero if files were modified)
-    assert (
-        "files were modified by this hook" in result.stdout or result.returncode == 0
-    ), f"Pre-commit failed with error: {result.stderr}"
+    # Check that pre-commit passed
+    assert result == 0, "Pre-commit failed with error"
 
     # Read the file after running cog
     with open(cog_file) as f:
@@ -156,34 +126,12 @@ def test_mixed_repository(
     with open(Path(git_repo) / ".cogfiles", "w") as f:
         f.write("passing.py\nfailing.py\n")
 
-    # Add the files to git
-    subprocess.run(
-        ["git", "add", "passing.py", "failing.py", ".cogfiles"],
-        cwd=git_repo,
-        check=True,
-        capture_output=True,
-    )
+    with chdir(git_repo):
+        # Run pre-commit try-repo using the module from dev dependencies
+        result = pre_commit_main(["try-repo", project_dir, "cog", "--all-files"])
 
-    # Run pre-commit try-repo with verbose output
-    result = subprocess.run(
-        [
-            "uvx",
-            "pre-commit",
-            "try-repo",
-            project_dir,
-            "cog",
-            "--all-files",
-            "--verbose",
-        ],
-        cwd=git_repo,
-        capture_output=True,
-        text=True,
-    )
-
-    # Check that pre-commit ran successfully (may return non-zero if files were modified)
-    assert (
-        "files were modified by this hook" in result.stdout or result.returncode == 0
-    ), f"Pre-commit failed with error: {result.stderr}"
+    # Check that pre-commit passed
+    assert result == 0, "Pre-commit failed with error"
 
     # Read the files after running cog directly
     with open(passing_file) as f:
