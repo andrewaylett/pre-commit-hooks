@@ -1,3 +1,15 @@
 {
-  "extends": ["config:recommended", "github>andrewaylett/renovate-config", ":assignAndReview(andrewaylett)"]
+  "extends": ["config:recommended", "github>andrewaylett/renovate-config", ":assignAndReview(andrewaylett)"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "src/andrewaylett_pre_commit_hooks/init_hooks.py"
+      ],
+      "matchStrings": [
+        "\"(?<depName>https://github.com/[^\"]+)\": *\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-tags"
+    }
+  ]
 }

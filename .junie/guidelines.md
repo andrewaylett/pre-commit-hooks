@@ -26,6 +26,13 @@ The project uses pytest for testing. To run all tests:
 uv run pytest
 ```
 
+We use `ruff` for formatting and linting:
+
+```bash
+uv run ruff format
+uv run ruff check
+```
+
 ## Additional Development Information
 
 ### How Cog Works
