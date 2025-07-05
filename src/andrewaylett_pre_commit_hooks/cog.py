@@ -50,6 +50,8 @@ def run_cog_on_files(files: set[str]) -> bool:
     """Run cog on the specified files.
 
     Returns True if all files were processed successfully, False otherwise.
+
+    Note: Cog can only be run single-threaded, so files are processed sequentially.
     """
     if not files:
         logger.info("No files with cog markers found.")
