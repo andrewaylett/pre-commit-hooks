@@ -7,6 +7,8 @@ import yaml
 
 from andrewaylett_pre_commit_hooks.init_hooks import (
     DEFAULT_HOOKS,
+    GITHUB_ACTIONS_HOOKS,
+    RENOVATE_HOOKS,
     ensure_pre_commit_config,
 )
 
@@ -162,3 +164,162 @@ def test_preserve_comments(temp_dir, pre_commit_config_with_comments):
     assert "# Use the latest version" in updated_content
     assert "# Remove trailing whitespace" in updated_content
     assert "# Fix end of files" in updated_content
+
+
+def test_github_actions_hooks_with_workflows_dir(temp_dir, empty_pre_commit_config):
+    """Test that GitHub Actions hooks are added when .github/workflows directory exists."""
+    # Create .github/workflows directory
+    workflows_dir = Path(temp_dir) / ".github" / "workflows"
+    workflows_dir.mkdir(parents=True)
+
+    # Define a test file path
+    file_path = Path(temp_dir) / ".pre-commit-config.yaml"
+
+    # Write an empty config to the file
+    with open(file_path, "w") as f:
+        yaml.dump(empty_pre_commit_config, f)
+
+    # Ensure the pre-commit config
+    success = ensure_pre_commit_config(str(file_path))
+
+    # Check that the operation was successful
+    assert success is True
+
+    # Read the updated config
+    with open(file_path) as f:
+        config = yaml.safe_load(f)
+
+    # Check that all GitHub Actions hooks are present
+    for repo_url, hooks in GITHUB_ACTIONS_HOOKS.items():
+        repo = next(
+            (repo for repo in config["repos"] if repo["repo"] == repo_url), None
+        )
+        assert repo is not None, f"Repository {repo_url} not found"
+        hook_ids = [hook["id"] for hook in repo["hooks"]]
+        for hook_id in hooks:
+            assert hook_id in hook_ids, (
+                f"Hook {hook_id} not found in repository {repo_url}"
+            )
+
+
+def test_github_actions_hooks_without_workflows_dir(temp_dir, empty_pre_commit_config):
+    """Test that GitHub Actions hooks are not added when .github/workflows directory doesn't exist."""
+    # Define a test file path
+    file_path = Path(temp_dir) / ".pre-commit-config.yaml"
+
+    # Write an empty config to the file
+    with open(file_path, "w") as f:
+        yaml.dump(empty_pre_commit_config, f)
+
+    # Ensure the pre-commit config
+    success = ensure_pre_commit_config(str(file_path))
+
+    # Check that the operation was successful
+    assert success is True
+
+    # Read the updated config
+    with open(file_path) as f:
+        config = yaml.safe_load(f)
+
+    # Check that GitHub Actions hooks are not present
+    for repo_url, hooks in GITHUB_ACTIONS_HOOKS.items():
+        repo = next(
+            (repo for repo in config["repos"] if repo["repo"] == repo_url), None
+        )
+        if repo is not None:
+            hook_ids = [hook["id"] for hook in repo["hooks"]]
+            for hook_id in hooks:
+                assert hook_id not in hook_ids, (
+                    f"Hook {hook_id} found in repository {repo_url}"
+                )
+
+
+def test_renovate_hooks_with_renovate_json(temp_dir, empty_pre_commit_config):
+    """Test that Renovate hooks are added when renovate.json file exists."""
+    # Create renovate.json file
+    renovate_file = Path(temp_dir) / "renovate.json"
+    with open(renovate_file, "w") as f:
+        f.write("{}")
+
+    # Define a test file path
+    file_path = Path(temp_dir) / ".pre-commit-config.yaml"
+
+    # Write an empty config to the file
+    with open(file_path, "w") as f:
+        yaml.dump(empty_pre_commit_config, f)
+
+    # Ensure the pre-commit config
+    success = ensure_pre_commit_config(str(file_path))
+
+    # Check that the operation was successful
+    assert success is True
+
+    # Read the updated config
+    with open(file_path) as f:
+        config = yaml.safe_load(f)
+
+    # Check that all Renovate hooks are present
+    for repo_url, hooks in RENOVATE_HOOKS.items():
+        repo = next(
+            (repo for repo in config["repos"] if repo["repo"] == repo_url), None
+        )
+        assert repo is not None, f"Repository {repo_url} not found"
+        hook_ids = [hook["id"] for hook in repo["hooks"]]
+        for hook in hooks:
+            if isinstance(hook, str):
+                hook_id = hook
+                assert hook_id in hook_ids, (
+                    f"Hook {hook_id} not found in repository {repo_url}"
+                )
+            else:
+                hook_id = hook["id"]
+                assert hook_id in hook_ids, (
+                    f"Hook {hook_id} not found in repository {repo_url}"
+                )
+                # Check that the hook has the correct arguments
+                hook_config = next(
+                    (h for h in repo["hooks"] if h["id"] == hook_id), None
+                )
+                assert hook_config is not None, (
+                    f"Hook {hook_id} not found in repository {repo_url}"
+                )
+                if "args" in hook:
+                    assert "args" in hook_config, (
+                        f"Hook {hook_id} does not have args in repository {repo_url}"
+                    )
+                    assert hook_config["args"] == hook["args"], (
+                        f"Hook {hook_id} has incorrect args in repository {repo_url}"
+                    )
+
+
+def test_renovate_hooks_without_renovate_json(temp_dir, empty_pre_commit_config):
+    """Test that Renovate hooks are not added when renovate.json file doesn't exist."""
+    # Define a test file path
+    file_path = Path(temp_dir) / ".pre-commit-config.yaml"
+
+    # Write an empty config to the file
+    with open(file_path, "w") as f:
+        yaml.dump(empty_pre_commit_config, f)
+
+    # Ensure the pre-commit config
+    success = ensure_pre_commit_config(str(file_path))
+
+    # Check that the operation was successful
+    assert success is True
+
+    # Read the updated config
+    with open(file_path) as f:
+        config = yaml.safe_load(f)
+
+    # Check that Renovate hooks are not present
+    for repo_url, hooks in RENOVATE_HOOKS.items():
+        repo = next(
+            (repo for repo in config["repos"] if repo["repo"] == repo_url), None
+        )
+        if repo is not None:
+            hook_ids = [hook["id"] for hook in repo["hooks"]]
+            for hook in hooks:
+                hook_id = hook if isinstance(hook, str) else hook["id"]
+                assert hook_id not in hook_ids, (
+                    f"Hook {hook_id} found in repository {repo_url}"
+                )
