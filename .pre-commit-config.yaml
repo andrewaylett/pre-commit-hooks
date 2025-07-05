@@ -43,6 +43,7 @@ repos:
   - id: ruff-check
     args:
     - --fix
+    - --unsafe-fixes
 - repo: https://github.com/astral-sh/uv-pre-commit
   rev: 0.7.19
   hooks:
@@ -51,3 +52,13 @@ repos:
   rev: v0.2.0
   hooks:
   - id: cog
+- repo: local
+  hooks:
+  - id: test
+    name: Run Pytest
+    language: python
+    entry: uv run pytest
+    additional_dependencies:
+    - "uv==0.7.19"
+    pass_filenames: false
+    always_run: true
