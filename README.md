@@ -109,11 +109,13 @@ along with their support files.
   * forbid-submodules
   * mixed-line-ending
   * yamlfmt
-  * actionlint
   * editorconfig-checker
-  * check-github-workflows
-  * check-renovate
   * init-hooks
+  * If `.github/workflows` directory exists:
+    * actionlint
+    * check-github-workflows
+  * If `renovate.json` file exists:
+    * check-renovate
 * .editorconfig
   * Basic settings
 * .yamlfmt.yaml

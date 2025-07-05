@@ -13,6 +13,7 @@ DEFAULT_REPO_VERSIONS = {
     "https://github.com/editorconfig-checker/editorconfig-checker.python": "3.2.1",
     "https://github.com/python-jsonschema/check-jsonschema": "0.33.1",
     "https://github.com/andrewaylett/pre-commit-hooks": "v0.2.0",
+    "https://github.com/renovatebot/pre-commit-hooks": "41.17.2",
 }
 
 # Default hooks that should be enabled
@@ -32,18 +33,31 @@ DEFAULT_HOOKS = {
     "https://github.com/google/yamlfmt": [
         "yamlfmt",
     ],
-    "https://github.com/rhysd/actionlint": [
-        "actionlint",
-    ],
     "https://github.com/editorconfig-checker/editorconfig-checker.python": [
         "editorconfig-checker",
     ],
-    "https://github.com/python-jsonschema/check-jsonschema": [
-        "check-github-workflows",
-        "check-renovate",
-    ],
     "https://github.com/andrewaylett/pre-commit-hooks": [
         "init-hooks",
+    ],
+}
+
+# Hooks that should be enabled only if .github/workflows directory exists
+GITHUB_ACTIONS_HOOKS = {
+    "https://github.com/rhysd/actionlint": [
+        "actionlint",
+    ],
+    "https://github.com/python-jsonschema/check-jsonschema": [
+        "check-github-workflows",
+    ],
+}
+
+# Hooks that should be enabled only if renovate.json file exists
+RENOVATE_HOOKS = {
+    "https://github.com/python-jsonschema/check-jsonschema": [
+        "check-renovate",
+    ],
+    "https://github.com/renovatebot/pre-commit-hooks": [
+        {"id": "renovate-config-validator", "args": ["--strict"]},
     ],
 }
 
@@ -145,6 +159,69 @@ def ensure_file_exists(file_path: str, default_content: str) -> bool:
         return False
 
 
+def add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type=""):
+    """Add hooks to repositories.
+
+    Args:
+        repos: List of repositories
+        existing_repos: Dictionary of existing repositories by URL
+        hooks_dict: Dictionary of hooks to add
+        hook_type: Type of hooks (for logging)
+
+    Returns:
+        None
+    """
+    for repo_url, hooks in hooks_dict.items():
+        if repo_url in existing_repos:
+            # Repository exists, check for missing hooks
+            repo_config = existing_repos[repo_url]
+
+            # Ensure hooks list exists
+            if "hooks" not in repo_config:
+                repo_config["hooks"] = []
+
+            # Get existing hook IDs
+            existing_hook_ids = {
+                hook["id"] for hook in repo_config["hooks"] if "id" in hook
+            }
+
+            # Add missing hooks
+            for hook in hooks:
+                # Handle both string hook IDs and dictionaries with id and args
+                if isinstance(hook, str):
+                    hook_id = hook
+                    hook_config = {"id": hook_id}
+                else:
+                    hook_id = hook["id"]
+                    hook_config = hook.copy()
+
+                if hook_id not in existing_hook_ids:
+                    type_prefix = f"{hook_type} " if hook_type else ""
+                    logger.info(
+                        f"Adding {type_prefix}hook {hook_id} to repository {repo_url}"
+                    )
+                    repo_config["hooks"].append(hook_config)
+        else:
+            # Repository doesn't exist, add it with default version and hooks
+            type_prefix = f"{hook_type} " if hook_type else ""
+            logger.info(f"Adding repository {repo_url} with {type_prefix}hooks")
+
+            # Convert hooks to proper format
+            hook_configs = []
+            for hook in hooks:
+                if isinstance(hook, str):
+                    hook_configs.append({"id": hook})
+                else:
+                    hook_configs.append(hook.copy())
+
+            new_repo = {
+                "repo": repo_url,
+                "rev": DEFAULT_REPO_VERSIONS.get(repo_url, "main"),
+                "hooks": hook_configs,
+            }
+            repos.append(new_repo)
+
+
 def ensure_pre_commit_config(config_path: str) -> bool:
     """Ensure the pre-commit config file exists and has the required hooks.
 
@@ -174,35 +251,18 @@ def ensure_pre_commit_config(config_path: str) -> bool:
         # Track existing repositories by URL
         existing_repos = {repo["repo"]: repo for repo in repos if "repo" in repo}
 
-        # Add missing repositories and hooks
-        for repo_url, hooks in DEFAULT_HOOKS.items():
-            if repo_url in existing_repos:
-                # Repository exists, check for missing hooks
-                repo_config = existing_repos[repo_url]
+        # Add missing repositories and hooks from DEFAULT_HOOKS
+        add_hooks_to_repos(repos, existing_repos, DEFAULT_HOOKS)
 
-                # Ensure hooks list exists
-                if "hooks" not in repo_config:
-                    repo_config["hooks"] = []
+        # Add GitHub Actions hooks if .github/workflows directory exists
+        if os.path.exists(".github/workflows"):
+            add_hooks_to_repos(
+                repos, existing_repos, GITHUB_ACTIONS_HOOKS, "GitHub Actions"
+            )
 
-                # Get existing hook IDs
-                existing_hook_ids = {
-                    hook["id"] for hook in repo_config["hooks"] if "id" in hook
-                }
-
-                # Add missing hooks
-                for hook_id in hooks:
-                    if hook_id not in existing_hook_ids:
-                        logger.info(f"Adding hook {hook_id} to repository {repo_url}")
-                        repo_config["hooks"].append({"id": hook_id})
-            else:
-                # Repository doesn't exist, add it with default version and hooks
-                logger.info(f"Adding repository {repo_url} with default hooks")
-                new_repo = {
-                    "repo": repo_url,
-                    "rev": DEFAULT_REPO_VERSIONS.get(repo_url, "main"),
-                    "hooks": [{"id": hook_id} for hook_id in hooks],
-                }
-                repos.append(new_repo)
+        # Add Renovate hooks if renovate.json file exists
+        if os.path.exists("renovate.json"):
+            add_hooks_to_repos(repos, existing_repos, RENOVATE_HOOKS, "Renovate")
 
         # Write the updated config
         return write_yaml_file(config_path, config)
