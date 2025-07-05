@@ -1,8 +1,7 @@
-"""Tests for the cog pre-commit hook using simulated repositories."""
+"""Integration tests for the cog pre-commit hook using simulated repositories."""
 
 import os
 import subprocess
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -11,14 +10,7 @@ import pytest
 @pytest.fixture
 def project_dir():
     """Return the absolute path to the project directory."""
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
-
-@pytest.fixture
-def temp_dir():
-    """Create a temporary directory for testing."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        yield temp_dir
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 
 
 @pytest.fixture
@@ -56,53 +48,10 @@ repos:
     return temp_dir
 
 
-@pytest.fixture
-def passing_content():
-    """Return content for a file with cog markers and correctly generated content."""
-    return """
-def example_passing():
-    # [ [ [cog
-    # import cog
-    # cog.outl("    print('Generated Passing')")
-    # ]]]
-    print('Generated Passing')
-    # [[[end]]]
-    pass
-""".replace("[ [ [", "[[[")
-
-
-@pytest.fixture
-def failing_content():
-    """Return content for a file with cog markers and incorrectly generated content."""
-    return """
-def example_failing():
-    # [ [ [cog
-    # import cog
-    # cog.outl("    print('Generated Failing')")
-    # ]]]
-    print('Wrong content')
-    # [[[end]]]
-    pass
-""".replace("[ [ [", "[[[")
-
-
-@pytest.fixture
-def create_file():
-    """Create a test file in the given temporary directory."""
-
-    def _create_file(content, temp_dir, filename):
-        file_path = Path(temp_dir) / filename
-        with open(file_path, "w") as f:
-            f.write(content)
-        return file_path
-
-    return _create_file
-
-
-def test_passing_repository(git_repo, passing_content, create_file, project_dir):
+def test_passing_repository(git_repo, passing_cog_content, create_file, project_dir):
     """Test that a repository with correctly generated cog content passes the pre-commit check."""
     # Create a file with cog markers and correctly generated content
-    create_file(passing_content, git_repo, "with_cog.py")
+    create_file(passing_cog_content, git_repo, "with_cog.py")
 
     # Create .cogfiles listing the files to process
     with open(Path(git_repo) / ".cogfiles", "w") as f:
@@ -129,10 +78,10 @@ def test_passing_repository(git_repo, passing_content, create_file, project_dir)
     assert "Passed" in result.stdout
 
 
-def test_failing_repository(git_repo, failing_content, create_file, project_dir):
+def test_failing_repository(git_repo, failing_cog_content, create_file, project_dir):
     """Test that a repository with incorrectly generated cog content gets fixed by the pre-commit hook."""
     # Create a file with cog markers and incorrectly generated content
-    cog_file = create_file(failing_content, git_repo, "with_cog.py")
+    cog_file = create_file(failing_cog_content, git_repo, "with_cog.py")
 
     # Save the original content for comparison
     with open(cog_file) as f:
@@ -166,9 +115,6 @@ def test_failing_repository(git_repo, failing_content, create_file, project_dir)
         text=True,
     )
 
-    print(f"Pre-commit stdout: {result.stdout}")
-    print(f"Pre-commit stderr: {result.stderr}")
-
     # Check that pre-commit ran successfully (may return non-zero if files were modified)
     assert (
         "files were modified by this hook" in result.stdout or result.returncode == 0
@@ -189,18 +135,18 @@ def test_failing_repository(git_repo, failing_content, create_file, project_dir)
 
 
 def test_mixed_repository(
-    git_repo, passing_content, failing_content, create_file, project_dir
+    git_repo, passing_cog_content, failing_cog_content, create_file, project_dir
 ):
     """Test a repository with both passing and failing files."""
     # Create a file with cog markers and correctly generated content
-    passing_file = create_file(passing_content, git_repo, "passing.py")
+    passing_file = create_file(passing_cog_content, git_repo, "passing.py")
 
     # Save the original passing content for comparison
     with open(passing_file) as f:
         original_passing = f.read()
 
     # Create a file with cog markers and incorrectly generated content
-    failing_file = create_file(failing_content, git_repo, "failing.py")
+    failing_file = create_file(failing_cog_content, git_repo, "failing.py")
 
     # Save the original failing content for comparison
     with open(failing_file) as f:
@@ -233,9 +179,6 @@ def test_mixed_repository(
         capture_output=True,
         text=True,
     )
-
-    print(f"Pre-commit stdout: {result.stdout}")
-    print(f"Pre-commit stderr: {result.stderr}")
 
     # Check that pre-commit ran successfully (may return non-zero if files were modified)
     assert (

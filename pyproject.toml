@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
   "cogapp>=3.5.1",
+  "ruamel.yaml>=0.17.0",
 ]
 
 [dependency-groups]
@@ -16,6 +17,7 @@ dev = [
   "pytest>=7.4.0",
   "ruff>=0.12.0",
   "pre-commit>=4.2.0",
+  "pyyaml>=6.0",
 ]
 
 [tool.ruff.lint]
@@ -42,6 +44,7 @@ python_files = "test_*.py"
 
 [project.scripts]
 pre-commit-cog = "andrewaylett_pre_commit_hooks.cog:main"
+pre-commit-init-hooks = "andrewaylett_pre_commit_hooks.init_hooks:main"
 
 [build-system]
 requires = ["hatchling"]

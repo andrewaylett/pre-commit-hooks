@@ -3,6 +3,8 @@ import sys
 
 from cogapp import Cog
 
+from andrewaylett_pre_commit_hooks import error_logger, logger
+
 
 def find_cog_files() -> set[str]:
     """Find files to process with cog.
@@ -15,34 +17,32 @@ def find_cog_files() -> set[str]:
     try:
         # Check for .cogfiles first
         if os.path.exists(".cogfiles"):
-            print("Using .cogfiles to determine which files to process")
+            logger.info("Using .cogfiles to determine which files to process")
             with open(".cogfiles") as f:
                 # Read the file list, strip whitespace, and filter out empty lines
                 files = {line.strip() for line in f if line.strip()}
             if not files:
-                print("Error: .cogfiles exists but is empty", file=sys.stderr)
+                error_logger.error("Error: .cogfiles exists but is empty")
                 sys.exit(1)
             return files
 
         # Check for README.md next
         elif os.path.exists("README.md"):
-            print("Processing README.md")
+            logger.info("Processing README.md")
             return {"README.md"}
 
         # Check for README last
         elif os.path.exists("README"):
-            print("Processing README")
+            logger.info("Processing README")
             return {"README"}
 
         # If none of the files exist, exit with an error
         else:
-            print(
-                "Error: Could not find .cogfiles, README.md, or README", file=sys.stderr
-            )
+            error_logger.error("Error: Could not find .cogfiles, README.md, or README")
             sys.exit(1)
 
     except Exception as e:
-        print(f"Error finding cog files: {e}", file=sys.stderr)
+        error_logger.error(f"Error finding cog files: {e}")
         sys.exit(1)
 
 
@@ -52,10 +52,10 @@ def run_cog_on_files(files: set[str]) -> bool:
     Returns True if all files were processed successfully, False otherwise.
     """
     if not files:
-        print("No files with cog markers found.")
+        logger.info("No files with cog markers found.")
         return True
 
-    print(f"Running cog on {len(files)} files...")
+    logger.info(f"Running cog on {len(files)} files...")
     success = True
 
     # Create a Cog instance with the appropriate options
@@ -84,7 +84,7 @@ def run_cog_on_files(files: set[str]) -> bool:
             cog_instance.process_one_file(file)
 
         except Exception as e:
-            print(f"Error processing {file}: {e}", file=sys.stderr)
+            error_logger.error(f"Error processing {file}: {e}")
             success = False
 
     return success

@@ -5,3 +5,10 @@
   language: python
   pass_filenames: false
   always_run: true
+- id: init-hooks
+  name: init-hooks (ensure baseline hooks)
+  description: Ensures that a baseline set of pre-commit hooks are enabled in the repository
+  entry: pre-commit-init-hooks
+  language: python
+  pass_filenames: false
+  always_run: true
