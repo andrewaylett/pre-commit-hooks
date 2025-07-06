@@ -10,6 +10,16 @@
         "\"https://github.com/(?<depName>[^\"]+)\": *\"(?<currentValue>[^\"]+)\""
       ],
       "datasourceTemplate": "github-tags"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "README.md"
+      ],
+      "matchStrings": [
+        "repo: https://github.com/(?<depName>[^\n]+)\n +rev: (?<currentValue>[^\n]+)"
+      ],
+      "datasourceTemplate": "github-tags"
     }
   ]
 }
