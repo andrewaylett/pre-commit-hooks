@@ -76,14 +76,33 @@ If the files already exist, but are missing entries, the missing entries will be
 
 ## Development
 
+### Dependencies
+
+I highly recommend using [uv](https://docs.astral.sh/uv/) to manage your python environment for this tool.
+You don't need to use uv directly if you only want to use the hooks from `pre-commit`,
+and if you really want to develop the tool without touching `uv` then you _can_ run all the tests and lints using just `pre-commit`.
+
 ### Running Tests
 
-This project uses pytest for testing. To run the tests:
+This project uses [pytest](https://pytest.org) for testing,
+[ruff](https://docs.astral.sh/ruff/) for linting and formatting,
+and [pytype](https://google.github.io/pytype/) for typing. To run them all:
 
 ```bash
 uv run pytest
+uv run ruff lint
+uv run ruff format
+uv run pytype
 ```
 
-The test suite includes:
-- Tests for the pre-commit hook functionality
-- Tests for cog-generated content
+or use pre-commit:
+
+```bash
+uv run pre-commit run -a
+```
+
+or if you prefer:
+
+```bash
+pre-commit run -a
+```

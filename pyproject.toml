@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
   { name = "Andrew Aylett", email = "andrew@aylett.co.uk" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
   "cogapp>=3.5.1",
   "ruamel.yaml>=0.17.0",
@@ -21,6 +21,7 @@ dev = [
   "pre-commit-uv>=4.1.4",
   "pytest-xdist>=3.8.0",
   "pytest-env>=1.1.5",
+  "pytype>=2024.10.11; python_version < '3.13'",
 ]
 
 [tool.ruff.lint]
@@ -48,6 +49,9 @@ addopts = "-n auto --durations=0"
 env = [
   "FORCE_PRE_COMMIT_UV_PATCH=1"
 ]
+
+[tool.pytype]
+inputs = ['src/andrewaylett_pre_commit_hooks']
 
 [project.scripts]
 pre-commit-cog = "andrewaylett_pre_commit_hooks.cog:main"
