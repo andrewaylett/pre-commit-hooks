@@ -2,23 +2,6 @@
 
 Add this repo to your `.pre-commit-config.yaml`:
 
-<!-- [[[cog
-result = sp.run(
-    ["git", "describe", "--tags"],
-    capture_output=True,
-    text=True,
-    check=True
-)
-version = result.stdout.strip().split('-')[0]
-cog.outl(f"""```yaml
-repos:
-- repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: {version}
-  hooks:
-    - id: cog
-    - id: init-hooks
-```""")
-]]] -->
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
@@ -27,28 +10,11 @@ repos:
     - id: cog
     - id: init-hooks
 ```
-<!-- [[[end]]] -->
 
 ## Available Hooks
 
 ### Cog
 
-<!-- [[[cog
-result = sp.run(
-    ["git", "describe", "--tags"],
-    capture_output=True,
-    text=True,
-    check=True
-)
-version = result.stdout.strip().split('-')[0]
-cog.outl(f"""```yaml
-repos:
-- repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: {version}
-  hooks:
-    - id: cog
-```""")
-]]] -->
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
@@ -56,7 +22,6 @@ repos:
   hooks:
     - id: cog
 ```
-<!-- [[[end]]] -->
 
 Runs [cog](https://github.com/nedbat/cog) against your `README.md`, `README`,
 or if a file named `.cogfiles` exists, all files listed in that file.
@@ -69,22 +34,6 @@ cog -r -c -p "import subprocess as sp, re, os, sys, pathlib as pl, cog" README.m
 
 ### Init hooks
 
-<!-- [[[cog
-result = sp.run(
-    ["git", "describe", "--tags"],
-    capture_output=True,
-    text=True,
-    check=True
-)
-version = result.stdout.strip().split('-')[0]
-cog.outl(f"""```yaml
-repos:
-- repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: {version}
-  hooks:
-    - id: init-hooks
-```""")
-]]] -->
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
@@ -92,7 +41,6 @@ repos:
   hooks:
     - id: init-hooks
 ```
-<!-- [[[end]]] -->
 
 Ensures that a baseline set of pre-commit hooks are enabled in the repository,
 along with their support files.
