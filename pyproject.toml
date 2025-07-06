@@ -22,6 +22,7 @@ dev = [
   "pytest-xdist>=3.8.0",
   "pytest-env>=1.1.5",
   "pytype>=2024.10.11; python_version < '3.13'",
+  "poethepoet>=0.36.0",
 ]
 
 [tool.ruff.lint]
@@ -56,6 +57,27 @@ inputs = ['src/andrewaylett_pre_commit_hooks']
 [project.scripts]
 pre-commit-cog = "andrewaylett_pre_commit_hooks.cog:main"
 pre-commit-init-hooks = "andrewaylett_pre_commit_hooks.init_hooks:main"
+
+[tool.poe.tasks.check]
+sequence = ["format", "lint", "type", "test"]
+help = "Format and run all static checks"
+ignore_fail = "return_non_zero"
+
+[tool.poe.tasks.format]
+cmd = "uv run ruff format"
+help = "Run Ruff to format code"
+
+[tool.poe.tasks.lint]
+cmd = "uv run ruff check --fix --unsafe-fixes"
+help = "Run Ruff to check and fix code"
+
+[tool.poe.tasks.type]
+cmd = "uv run pytype"
+help = "Run Pytype for type checks"
+
+[tool.poe.tasks.test]
+cmd = "uv run pytest"
+help = "Run Pytest for unit tests"
 
 [build-system]
 requires = ["hatchling"]
