@@ -14,18 +14,4 @@ jobs:
     steps:
     - name: Check out
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      with:
-        fetch-depth: 0
-    - name: Set up Python
-      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
-      with:
-        cache: pip
-        python-version-file: .python-version
-        cache-dependency-path: uv.lock
     - uses: andrewaylett/pre-commit-action@a975c0a22b967c4d0f8b70a01aadb01b50a1f2eb # v4
-    - name: Install the latest version of uv
-      uses: astral-sh/setup-uv@bd01e18f51369d5a26f1651c3cb451d3417e3bba # v6
-      with:
-        enable-cache: true
-    - name: Test
-      run: uv run --frozen pytest

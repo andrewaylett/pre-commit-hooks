@@ -50,10 +50,18 @@ repos:
   - id: uv-lock
 - repo: local
   hooks:
-  - id: test
+  - id: pytest
     name: Run Pytest
     language: python
     entry: uv run pytest
+    additional_dependencies:
+    - "uv==0.7.19"
+    pass_filenames: false
+    always_run: true
+  - id: pytype
+    name: Run Pytype
+    language: python
+    entry: uv run pytype
     additional_dependencies:
     - "uv==0.7.19"
     pass_filenames: false
