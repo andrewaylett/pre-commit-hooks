@@ -1,9 +1,22 @@
 import os
 import sys
+from typing import Any, NotRequired, TypedDict
 
 from ruamel.yaml import YAML
 
 from andrewaylett_pre_commit_hooks import error_logger, logger
+
+
+class PreCommitHook(TypedDict):
+    id: str
+    args: NotRequired[list[str]]
+
+
+class PreCommitRepo(TypedDict):
+    repo: str
+    rev: str
+    hooks: list[PreCommitHook]
+
 
 # Default versions for repositories
 DEFAULT_REPO_VERSIONS = {
@@ -88,7 +101,7 @@ DEFAULT_GITIGNORE = """*~
 """
 
 
-def read_yaml_file(file_path: str) -> dict:
+def read_yaml_file(file_path: str) -> dict[str, Any]:
     """Read and parse a YAML file.
 
     Args:
@@ -168,7 +181,12 @@ def ensure_file_exists(file_path: str, default_content: str) -> bool:
         return False
 
 
-def add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type="") -> bool:
+def add_hooks_to_repos(
+    repos: list[PreCommitRepo],
+    existing_repos: dict[str, PreCommitRepo],
+    hooks_dict: dict[str, list[str | PreCommitHook]],
+    hook_type: str = "",
+) -> bool:
     """Add hooks to repositories.
 
     Args:
@@ -222,15 +240,15 @@ def add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type="") -> bool:
             hook_configs = []
             for hook in hooks:
                 if isinstance(hook, str):
-                    hook_configs.append({"id": hook})
+                    hook_configs.append(PreCommitHook(id=hook))
                 else:
                     hook_configs.append(hook.copy())
 
-            new_repo = {
-                "repo": repo_url,
-                "rev": DEFAULT_REPO_VERSIONS.get(repo_url, "main"),
-                "hooks": hook_configs,
-            }
+            new_repo = PreCommitRepo(
+                repo=repo_url,
+                rev=DEFAULT_REPO_VERSIONS.get(repo_url, "main"),
+                hooks=hook_configs,
+            )
             repos.append(new_repo)
             existing_repos[repo_url] = new_repo
 
