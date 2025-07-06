@@ -22,7 +22,7 @@ repos:
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.2.0
+  rev: v0.3.0
   hooks:
     - id: cog
     - id: init-hooks
@@ -52,7 +52,7 @@ repos:
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.2.0
+  rev: v0.3.0
   hooks:
     - id: cog
 ```
@@ -88,7 +88,7 @@ repos:
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.2.0
+  rev: v0.3.0
   hooks:
     - id: init-hooks
 ```
