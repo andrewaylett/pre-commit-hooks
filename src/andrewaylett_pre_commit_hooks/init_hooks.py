@@ -114,6 +114,8 @@ def read_yaml_file(file_path: str) -> dict:
 def write_yaml_file(file_path: str, content: dict) -> bool:
     """Write content to a YAML file.
 
+    The YAML formatting is hard-coded to match the format in .yamlfmt.yaml.
+
     Args:
         file_path: Path to the YAML file
         content: Content to write to the file
@@ -122,11 +124,18 @@ def write_yaml_file(file_path: str, content: dict) -> bool:
         True if successful, False otherwise
     """
     try:
+        # Configure YAML formatting to match .yamlfmt.yaml
         yaml = YAML()
         yaml.preserve_quotes = True
-        yaml.indent(mapping=2, sequence=4, offset=2)
+        # Basic formatter settings from .yamlfmt.yaml
+        yaml.indent(mapping=2, sequence=4, offset=2)  # indentless_arrays: true
         yaml.width = 88
+        yaml.map_indent = 2
+        # Ensure compatibility with PyYAML
+        yaml.default_flow_style = False
 
+        # Write the content to the file
+        logger.info(f"Writing changes to {file_path}")
         with open(file_path, "w") as f:
             yaml.dump(content, f)
         return True
@@ -159,7 +168,7 @@ def ensure_file_exists(file_path: str, default_content: str) -> bool:
         return False
 
 
-def add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type=""):
+def add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type="") -> bool:
     """Add hooks to repositories.
 
     Args:
@@ -169,8 +178,9 @@ def add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type=""):
         hook_type: Type of hooks (for logging)
 
     Returns:
-        None
+        True if the repos list was mutated, False otherwise
     """
+    mutated = False
     for repo_url, hooks in hooks_dict.items():
         if repo_url in existing_repos:
             # Repository exists, check for missing hooks
@@ -196,12 +206,14 @@ def add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type=""):
                     hook_config = hook.copy()
 
                 if hook_id not in existing_hook_ids:
+                    mutated = True
                     type_prefix = f"{hook_type} " if hook_type else ""
                     logger.info(
                         f"Adding {type_prefix}hook {hook_id} to repository {repo_url}"
                     )
                     repo_config["hooks"].append(hook_config)
         else:
+            mutated = True
             # Repository doesn't exist, add it with default version and hooks
             type_prefix = f"{hook_type} " if hook_type else ""
             logger.info(f"Adding repository {repo_url} with {type_prefix}hooks")
@@ -220,6 +232,9 @@ def add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type=""):
                 "hooks": hook_configs,
             }
             repos.append(new_repo)
+            existing_repos[repo_url] = new_repo
+
+    return mutated
 
 
 def ensure_pre_commit_config(config_path: str) -> bool:
@@ -251,21 +266,32 @@ def ensure_pre_commit_config(config_path: str) -> bool:
         # Track existing repositories by URL
         existing_repos = {repo["repo"]: repo for repo in repos if "repo" in repo}
 
+        # Track mutations
+        mutated = False
+
         # Add missing repositories and hooks from DEFAULT_HOOKS
-        add_hooks_to_repos(repos, existing_repos, DEFAULT_HOOKS)
+        mutated = add_hooks_to_repos(repos, existing_repos, DEFAULT_HOOKS) or mutated
 
         # Add GitHub Actions hooks if .github/workflows directory exists
         if os.path.exists(".github/workflows"):
-            add_hooks_to_repos(
-                repos, existing_repos, GITHUB_ACTIONS_HOOKS, "GitHub Actions"
+            mutated = (
+                add_hooks_to_repos(
+                    repos, existing_repos, GITHUB_ACTIONS_HOOKS, "GitHub Actions"
+                )
+                or mutated
             )
 
         # Add Renovate hooks if renovate.json file exists
         if os.path.exists("renovate.json"):
-            add_hooks_to_repos(repos, existing_repos, RENOVATE_HOOKS, "Renovate")
+            mutated = (
+                add_hooks_to_repos(repos, existing_repos, RENOVATE_HOOKS, "Renovate")
+                or mutated
+            )
 
         # Write the updated config
-        return write_yaml_file(config_path, config)
+        if mutated:
+            return write_yaml_file(config_path, config)
+        return True
 
     except Exception as e:
         error_logger.error(f"Error ensuring pre-commit config: {e}")

@@ -166,6 +166,51 @@ def test_preserve_comments(temp_dir, pre_commit_config_with_comments):
     assert "# Fix end of files" in updated_content
 
 
+def test_no_write_when_no_changes(temp_dir, monkeypatch):
+    """Test that ensure_pre_commit_config doesn't write when no changes are needed."""
+    # Create a complete pre-commit config with all required hooks
+    file_path = Path(temp_dir) / ".pre-commit-config.yaml"
+
+    # Create a config with all the default hooks
+    config = {"repos": []}
+    for repo_url, hooks in DEFAULT_HOOKS.items():
+        hook_configs = []
+        for hook in hooks:
+            if isinstance(hook, str):
+                hook_configs.append({"id": hook})
+            else:
+                hook_configs.append(hook.copy())
+
+        config["repos"].append(
+            {
+                "repo": repo_url,
+                "rev": "main",
+                "hooks": hook_configs,
+            }
+        )
+
+    # Write the config to the file
+    with open(file_path, "w") as f:
+        yaml.dump(config, f)
+
+    # Create a mock write_yaml_file function to check if it's called
+    from unittest.mock import MagicMock
+
+    mock_write = MagicMock(return_value=True)
+    monkeypatch.setattr(
+        "andrewaylett_pre_commit_hooks.init_hooks.write_yaml_file", mock_write
+    )
+
+    # Ensure the pre-commit config
+    success = ensure_pre_commit_config(str(file_path))
+
+    # Check that the operation was successful
+    assert success is True
+
+    # Check that write_yaml_file was not called
+    mock_write.assert_not_called()
+
+
 def test_github_actions_hooks_with_workflows_dir(temp_dir, empty_pre_commit_config):
     """Test that GitHub Actions hooks are added when .github/workflows directory exists."""
     # Create .github/workflows directory
