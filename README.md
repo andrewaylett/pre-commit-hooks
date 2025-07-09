@@ -86,16 +86,14 @@ and if you really want to develop the tool without touching `uv` then you _can_ 
 
 This project uses [pytest](https://pytest.org) for testing,
 [ruff](https://docs.astral.sh/ruff/) for linting and formatting,
-and [pytype](https://google.github.io/pytype/) for typing. To run them all:
+and [pytype](https://google.github.io/pytype/) for typing.
+To run them all using [poe](https://poethepoet.natn.io/):
 
 ```bash
-uv run pytest
-uv run ruff lint
-uv run ruff format
-uv run pytype
+uv run poe check
 ```
 
-or use pre-commit:
+or using pre-commit:
 
 ```bash
 uv run pre-commit run -a

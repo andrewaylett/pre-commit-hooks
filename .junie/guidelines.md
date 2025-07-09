@@ -9,28 +9,14 @@ This document provides guidelines and instructions for developing and maintainin
 - Python 3.13 or higher
 - [uv](https://github.com/astral-sh/uv) for package management
 
-### Project Structure
-
-- `src/pre_commit_hooks/`: Source code for the pre-commit hooks
-  - `cog.py`: Implementation of the cog pre-commit hook
-- `tests/`: Test files
-- `.pre-commit-hooks.yaml`: Configuration for the pre-commit hooks
-
 ## Testing Information
 
 ### Running Tests
 
-The project uses pytest for testing. To run all tests:
+The project uses pytest for testing. To run all tests, formatting, linting, and typing:
 
 ```bash
-uv run pytest
-```
-
-We use `ruff` for formatting and linting:
-
-```bash
-uv run ruff format
-uv run ruff check
+uv run poe check
 ```
 
 ## Additional Development Information
@@ -43,21 +29,6 @@ The cog tool processes files with special markers:
 - `[[[end]]]` marks the end of the generated output
 
 The Python code between these markers is executed, and any output from `cog.outl()` or `cog.out()` is inserted into the file.
-
-### Ripgrep Dependency
-
-The hook uses ripgrep (`rg`) to efficiently find files containing cog markers. Make sure ripgrep is installed on your system.
-
-### Error Handling
-
-The hook is designed to:
-1. Find all files with cog markers
-2. Run cog on each file
-3. Exit with a non-zero status if any file fails to process
-
-### Python Version
-
-The project requires Python 3.13 or higher, as specified in the `pyproject.toml` file.
 
 ### Testing pre-commit hooks
 
