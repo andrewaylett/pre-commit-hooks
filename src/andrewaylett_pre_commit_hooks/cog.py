@@ -4,48 +4,49 @@ import sys
 from cogapp import Cog
 
 from andrewaylett_pre_commit_hooks import error_logger, logger
+from andrewaylett_pre_commit_hooks.common import handle_errors
 
 
-def find_cog_files() -> set[str]:
+@handle_errors
+def find_cog_files() -> set[str] | bool:
     """Find files to process with cog.
 
     Looks for the first file that exists of `.cogfiles`, `README.md` or `README`.
     - If `.cogfiles` exists, use it as a list of files to check
     - If a README file exists, process just that file
-    - If neither exists, exit with an error
+    - If neither exists, return False
+
+    Returns:
+        A set of files to process, or False if an error occurred
     """
-    try:
-        # Check for .cogfiles first
-        if os.path.exists(".cogfiles"):
-            logger.info("Using .cogfiles to determine which files to process")
-            with open(".cogfiles") as f:
-                # Read the file list, strip whitespace, and filter out empty lines
-                files = {line.strip() for line in f if line.strip()}
-            if not files:
-                error_logger.error("Error: .cogfiles exists but is empty")
-                sys.exit(1)
-            return files
+    # Check for .cogfiles first
+    if os.path.exists(".cogfiles"):
+        logger.info("Using .cogfiles to determine which files to process")
+        with open(".cogfiles") as f:
+            # Read the file list, strip whitespace, and filter out empty lines
+            files = {line.strip() for line in f if line.strip()}
+        if not files:
+            error_logger.error("Error: .cogfiles exists but is empty")
+            return False
+        return files
 
-        # Check for README.md next
-        elif os.path.exists("README.md"):
-            logger.info("Processing README.md")
-            return {"README.md"}
+    # Check for README.md next
+    elif os.path.exists("README.md"):
+        logger.info("Processing README.md")
+        return {"README.md"}
 
-        # Check for README last
-        elif os.path.exists("README"):
-            logger.info("Processing README")
-            return {"README"}
+    # Check for README last
+    elif os.path.exists("README"):
+        logger.info("Processing README")
+        return {"README"}
 
-        # If none of the files exist, exit with an error
-        else:
-            error_logger.error("Error: Could not find .cogfiles, README.md, or README")
-            sys.exit(1)
-
-    except Exception as e:
-        error_logger.error(f"Error finding cog files: {e}")
-        sys.exit(1)
+    # If none of the files exist, return False
+    else:
+        error_logger.error("Error: Could not find .cogfiles, README.md, or README")
+        return False
 
 
+@handle_errors
 def run_cog_on_files(files: set[str]) -> bool:
     """Run cog on the specified files.
 

@@ -3,8 +3,10 @@ import subprocess
 import sys
 
 from andrewaylett_pre_commit_hooks import error_logger, logger
+from andrewaylett_pre_commit_hooks.common import handle_errors
 
 
+@handle_errors
 def run_uv_command(args: list[str], use_exec: bool = False) -> bool:
     """Run a command using uv run.
 
@@ -24,42 +26,33 @@ def run_uv_command(args: list[str], use_exec: bool = False) -> bool:
     logger.info(f"Running: {' '.join(command)}")
 
     if use_exec:
-        try:
-            # Replace the current process with uv
-            # This will not return if successful
-            os.execvp("uv", command)
-            # This line will only be reached in tests when os.execvp is mocked
-            # noinspection PyUnreachableCode
-            return True
-        except Exception as e:
-            error_logger.error(f"Error running uv command with exec: {e}")
-            return False
+        # Replace the current process with uv
+        # This will not return if successful
+        os.execvp("uv", command)
+        # This line will only be reached in tests when os.execvp is mocked
+        # noinspection PyUnreachableCode
+        return True
     else:
-        try:
-            # Run the command and capture output
-            result = subprocess.run(
-                command,
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+        # Run the command and capture output
+        result = subprocess.run(
+            command,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
 
-            # Print the output
-            if result.stdout:
-                print(result.stdout, end="")
-            if result.stderr:
-                print(result.stderr, end="", file=sys.stderr)
+        # Print the output
+        if result.stdout:
+            print(result.stdout, end="")
+        if result.stderr:
+            print(result.stderr, end="", file=sys.stderr)
 
-            # Check if the command succeeded
-            if result.returncode != 0:
-                error_logger.error(f"Command failed with exit code {result.returncode}")
-                return False
-
-            return True
-
-        except Exception as e:
-            error_logger.error(f"Error running uv command: {e}")
+        # Check if the command succeeded
+        if result.returncode != 0:
+            error_logger.error(f"Command failed with exit code {result.returncode}")
             return False
+
+        return True
 
 
 def main() -> None:

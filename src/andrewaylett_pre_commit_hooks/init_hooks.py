@@ -4,7 +4,11 @@ from typing import Any, NotRequired, TypedDict
 
 from ruamel.yaml import YAML
 
-from andrewaylett_pre_commit_hooks import error_logger, logger
+from andrewaylett_pre_commit_hooks import logger
+from andrewaylett_pre_commit_hooks.common import (
+    ensure_file_exists,
+    handle_errors,
+)
 
 
 class PreCommitHook(TypedDict):
@@ -101,6 +105,7 @@ DEFAULT_GITIGNORE = """*~
 """
 
 
+@handle_errors
 def read_yaml_file(file_path: str) -> dict[str, Any]:
     """Read and parse a YAML file.
 
@@ -110,20 +115,17 @@ def read_yaml_file(file_path: str) -> dict[str, Any]:
     Returns:
         Dict containing the parsed YAML content
     """
-    try:
-        yaml = YAML()
-        yaml.preserve_quotes = True
+    yaml = YAML()
+    yaml.preserve_quotes = True
 
-        if os.path.exists(file_path):
-            with open(file_path) as f:
-                content = yaml.load(f) or {}
-                return content
-        return {}
-    except Exception as e:
-        error_logger.error(f"Error reading YAML file {file_path}: {e}")
-        return {}
+    if os.path.exists(file_path):
+        with open(file_path) as f:
+            content = yaml.load(f) or {}
+            return content
+    return {}
 
 
+@handle_errors
 def write_yaml_file(file_path: str, content: dict) -> bool:
     """Write content to a YAML file.
 
@@ -136,51 +138,24 @@ def write_yaml_file(file_path: str, content: dict) -> bool:
     Returns:
         True if successful, False otherwise
     """
-    try:
-        # Configure YAML formatting to match .yamlfmt.yaml
-        yaml = YAML()
-        yaml.preserve_quotes = True
-        # Basic formatter settings from .yamlfmt.yaml
-        yaml.indent(mapping=2, sequence=4, offset=2)  # indentless_arrays: true
-        yaml.width = 88
-        yaml.map_indent = 2
-        # Ensure compatibility with PyYAML
-        yaml.default_flow_style = False
+    # Configure YAML formatting to match .yamlfmt.yaml
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    # Basic formatter settings from .yamlfmt.yaml
+    yaml.indent(mapping=2, sequence=4, offset=2)  # indentless_arrays: true
+    yaml.width = 88
+    yaml.map_indent = 2
+    # Ensure compatibility with PyYAML
+    yaml.default_flow_style = False
 
-        # Write the content to the file
-        logger.info(f"Writing changes to {file_path}")
-        with open(file_path, "w") as f:
-            yaml.dump(content, f)
-        return True
-    except Exception as e:
-        error_logger.error(f"Error writing YAML file {file_path}: {e}")
-        return False
+    # Write the content to the file
+    logger.info(f"Writing changes to {file_path}")
+    with open(file_path, "w") as f:
+        yaml.dump(content, f)
+    return True
 
 
-def ensure_file_exists(file_path: str, default_content: str) -> bool:
-    """Ensure a file exists with the specified content.
-
-    If the file doesn't exist, create it with the default content.
-    If the file exists, leave it unchanged.
-
-    Args:
-        file_path: Path to the file
-        default_content: Default content for the file if it doesn't exist
-
-    Returns:
-        True if successful, False otherwise
-    """
-    try:
-        if not os.path.exists(file_path):
-            logger.info(f"Creating {file_path} with default content")
-            with open(file_path, "w") as f:
-                f.write(default_content)
-        return True
-    except Exception as e:
-        error_logger.error(f"Error ensuring file {file_path} exists: {e}")
-        return False
-
-
+@handle_errors
 def add_hooks_to_repos(
     repos: list[PreCommitRepo],
     existing_repos: dict[str, PreCommitRepo],
@@ -255,6 +230,7 @@ def add_hooks_to_repos(
     return mutated
 
 
+@handle_errors
 def ensure_pre_commit_config(config_path: str) -> bool:
     """Ensure the pre-commit config file exists and has the required hooks.
 
@@ -264,56 +240,51 @@ def ensure_pre_commit_config(config_path: str) -> bool:
     Returns:
         True if successful, False otherwise
     """
-    try:
-        # Read the current config
-        config = read_yaml_file(config_path)
+    # Read the current config
+    config = read_yaml_file(config_path)
 
-        # Initialize config if it doesn't exist
-        if not config:
-            config = {
-                "repos": [],
-            }
+    # Initialize config if it doesn't exist
+    if not config:
+        config = {
+            "repos": [],
+        }
 
-        # Ensure repos exists
-        if "repos" not in config:
-            config["repos"] = []
+    # Ensure repos exists
+    if "repos" not in config:
+        config["repos"] = []
 
-        # Get the current repositories
-        repos = config["repos"]
+    # Get the current repositories
+    repos = config["repos"]
 
-        # Track existing repositories by URL
-        existing_repos = {repo["repo"]: repo for repo in repos if "repo" in repo}
+    # Track existing repositories by URL
+    existing_repos = {repo["repo"]: repo for repo in repos if "repo" in repo}
 
-        # Track mutations
-        mutated = False
+    # Track mutations
+    mutated = False
 
-        # Add missing repositories and hooks from DEFAULT_HOOKS
-        mutated = add_hooks_to_repos(repos, existing_repos, DEFAULT_HOOKS) or mutated
+    # Add missing repositories and hooks from DEFAULT_HOOKS
+    mutated = add_hooks_to_repos(repos, existing_repos, DEFAULT_HOOKS) or mutated
 
-        # Add GitHub Actions hooks if .github/workflows directory exists
-        if os.path.exists(".github/workflows"):
-            mutated = (
-                add_hooks_to_repos(
-                    repos, existing_repos, GITHUB_ACTIONS_HOOKS, "GitHub Actions"
-                )
-                or mutated
+    # Add GitHub Actions hooks if .github/workflows directory exists
+    if os.path.exists(".github/workflows"):
+        mutated = (
+            add_hooks_to_repos(
+                repos, existing_repos, GITHUB_ACTIONS_HOOKS, "GitHub Actions"
             )
+            or mutated
+        )
 
-        # Add Renovate hooks if renovate.json file exists
-        if os.path.exists("renovate.json"):
-            mutated = (
-                add_hooks_to_repos(repos, existing_repos, RENOVATE_HOOKS, "Renovate")
-                or mutated
-            )
+    # Add Renovate hooks if renovate.json file exists
+    if os.path.exists("renovate.json"):
+        mutated = (
+            add_hooks_to_repos(repos, existing_repos, RENOVATE_HOOKS, "Renovate")
+            or mutated
+        )
 
-        # Write the updated config
-        if mutated:
-            return write_yaml_file(config_path, config)
-        return True
-
-    except Exception as e:
-        error_logger.error(f"Error ensuring pre-commit config: {e}")
-        return False
+    # Write the updated config
+    if mutated:
+        return write_yaml_file(config_path, config)
+    return True
 
 
 def main() -> None:
