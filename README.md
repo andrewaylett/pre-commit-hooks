@@ -32,6 +32,40 @@ The equivalent local incantation would be:
 cog -r -c -p "import subprocess as sp, re, os, sys, pathlib as pl, cog" README.md
 ```
 
+### UV
+
+```yaml
+repos:
+- repo: https://github.com/andrewaylett/pre-commit-hooks
+  rev: v0.3.0
+  hooks:
+    - id: uv-run
+      name: Run pytest
+      args:
+        - pytest
+        - --verbose
+```
+
+Executes a project command using `uv run`.
+
+This is roughly equivalent to this local hook:
+
+```yaml
+- repo: local
+  hooks:
+  - id: uv-run
+    name: Run pytest
+    language: python
+    entry: uv run pytest --verbose
+    additional_dependencies:
+    - "uv==0.7.20"
+    pass_filenames: false
+    always_run: true
+```
+
+The biggest difference is that pre-commit will cache the dedicated hook, while the local hook needs pre-commit
+to download and use `virtualenv` and `uv` every time it's run.
+
 ### Init hooks
 
 ```yaml

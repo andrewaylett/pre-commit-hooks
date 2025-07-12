@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
   "cogapp>=3.5.1",
   "ruamel.yaml>=0.17.0",
+  "uv>=0.7.20",
 ]
 
 [dependency-groups]
@@ -57,6 +58,7 @@ inputs = ['src/andrewaylett_pre_commit_hooks']
 [project.scripts]
 pre-commit-cog = "andrewaylett_pre_commit_hooks.cog:main"
 pre-commit-init-hooks = "andrewaylett_pre_commit_hooks.init_hooks:main"
+pre-commit-uv-run = "andrewaylett_pre_commit_hooks.uv_run:main"
 
 [tool.poe.tasks.check]
 sequence = ["format", "lint", "type", "test"]
