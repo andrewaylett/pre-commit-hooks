@@ -12,3 +12,10 @@
   language: python
   pass_filenames: false
   always_run: true
+- id: uv-run
+  name: uv-run (execute command with uv)
+  description: Executes a project command using uv run
+  entry: pre-commit-uv-run
+  language: python
+  pass_filenames: false
+  always_run: true
