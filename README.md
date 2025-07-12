@@ -37,7 +37,7 @@ cog -r -c -p "import subprocess as sp, re, os, sys, pathlib as pl, cog" README.m
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.3.0
+  rev: v0.4.0
   hooks:
     - id: uv-run
       name: Run pytest
