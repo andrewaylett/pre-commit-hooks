@@ -31,10 +31,10 @@ def test_write_yaml_file(temp_dir):
 
     # Write the config to a file
     file_path = Path(temp_dir) / "test.yaml"
-    success = write_yaml_file(str(file_path), test_config)
+    new_file = write_yaml_file(str(file_path), test_config)
 
     # Check that the write was successful
-    assert success is True
+    assert new_file is True
     assert file_path.exists()
 
     # Read the file back and check the content
@@ -50,10 +50,10 @@ def test_ensure_file_exists_new_file(temp_dir):
     test_content = "Test content\n"
 
     # Ensure the file exists
-    success = ensure_file_exists(str(file_path), test_content)
+    new_file = ensure_file_exists(str(file_path), test_content)
 
     # Check that the operation was successful
-    assert success is True
+    assert new_file is True
     assert file_path.exists()
 
     # Check that the file has the expected content
@@ -72,10 +72,10 @@ def test_ensure_file_exists_existing_file(temp_dir):
 
     # Ensure the file exists
     test_content = "Test content\n"
-    success = ensure_file_exists(str(file_path), test_content)
+    new_file = ensure_file_exists(str(file_path), test_content)
 
-    # Check that the operation was successful
-    assert success is True
+    # Check that the operation was successful but no file was created
+    assert new_file is False
 
     # Check that the file content is unchanged
     with open(file_path) as f:

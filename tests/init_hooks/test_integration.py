@@ -1,6 +1,7 @@
 """Integration tests for the init-hooks pre-commit hook."""
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -19,7 +20,9 @@ pytestmark = pytest.mark.change_dir
 def test_main(temp_dir):
     """Test the main function."""
     # Run the main function
-    main()
+    with patch("sys.exit") as mock_exit:
+        main()
+        mock_exit.assert_called_once_with(1)
 
     # Check that the required files exist
     assert Path(temp_dir, ".editorconfig").exists()

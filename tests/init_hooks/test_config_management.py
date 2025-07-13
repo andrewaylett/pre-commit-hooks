@@ -79,10 +79,10 @@ def test_ensure_pre_commit_config_empty(temp_dir, empty_pre_commit_config):
         yaml.dump(empty_pre_commit_config, f)
 
     # Ensure the pre-commit config
-    success = ensure_pre_commit_config(str(file_path))
+    new_file = ensure_pre_commit_config(str(file_path))
 
     # Check that the operation was successful
-    assert success is True
+    assert new_file is False
 
     # Read the updated config
     with open(file_path) as f:
@@ -110,10 +110,10 @@ def test_ensure_pre_commit_config_partial(
 ):
     """Test that ensure_pre_commit_config correctly updates a partial config."""
     # Ensure the pre-commit config
-    success = ensure_pre_commit_config(str(pre_commit_config_file))
+    new_file = ensure_pre_commit_config(str(pre_commit_config_file))
 
-    # Check that the operation was successful
-    assert success is True
+    # Check that the operation was successful but no file was created
+    assert new_file is False
 
     # Read the updated config
     with open(pre_commit_config_file) as f:
@@ -149,10 +149,10 @@ def test_ensure_pre_commit_config_partial(
 def test_preserve_comments(temp_dir, pre_commit_config_with_comments):
     """Test that comments in pre-commit config files are preserved."""
     # Ensure the pre-commit config
-    success = ensure_pre_commit_config(str(pre_commit_config_with_comments))
+    new_file = ensure_pre_commit_config(str(pre_commit_config_with_comments))
 
-    # Check that the operation was successful
-    assert success is True
+    # Check that the operation was successful but no file was created
+    assert new_file is False
 
     # Read the updated file content
     with open(pre_commit_config_with_comments) as f:
@@ -202,10 +202,10 @@ def test_no_write_when_no_changes(temp_dir, monkeypatch):
     )
 
     # Ensure the pre-commit config
-    success = ensure_pre_commit_config(str(file_path))
+    new_file = ensure_pre_commit_config(str(file_path))
 
-    # Check that the operation was successful
-    assert success is True
+    # Check that no new file was reported
+    assert new_file is False
 
     # Check that write_yaml_file was not called
     mock_write.assert_not_called()
@@ -225,10 +225,10 @@ def test_github_actions_hooks_with_workflows_dir(temp_dir, empty_pre_commit_conf
         yaml.dump(empty_pre_commit_config, f)
 
     # Ensure the pre-commit config
-    success = ensure_pre_commit_config(str(file_path))
+    new_file = ensure_pre_commit_config(str(file_path))
 
-    # Check that the operation was successful
-    assert success is True
+    # Check that the operation was successful but no file was created
+    assert new_file is False
 
     # Read the updated config
     with open(file_path) as f:
@@ -257,10 +257,10 @@ def test_github_actions_hooks_without_workflows_dir(temp_dir, empty_pre_commit_c
         yaml.dump(empty_pre_commit_config, f)
 
     # Ensure the pre-commit config
-    success = ensure_pre_commit_config(str(file_path))
+    new_file = ensure_pre_commit_config(str(file_path))
 
-    # Check that the operation was successful
-    assert success is True
+    # Check that the operation was successful but no file was created
+    assert new_file is False
 
     # Read the updated config
     with open(file_path) as f:
@@ -294,10 +294,10 @@ def test_renovate_hooks_with_renovate_json(temp_dir, empty_pre_commit_config):
         yaml.dump(empty_pre_commit_config, f)
 
     # Ensure the pre-commit config
-    success = ensure_pre_commit_config(str(file_path))
+    new_file = ensure_pre_commit_config(str(file_path))
 
-    # Check that the operation was successful
-    assert success is True
+    # Check that the operation was successful but no file was created
+    assert new_file is False
 
     # Read the updated config
     with open(file_path) as f:
@@ -347,10 +347,10 @@ def test_renovate_hooks_without_renovate_json(temp_dir, empty_pre_commit_config)
         yaml.dump(empty_pre_commit_config, f)
 
     # Ensure the pre-commit config
-    success = ensure_pre_commit_config(str(file_path))
+    new_file = ensure_pre_commit_config(str(file_path))
 
-    # Check that the operation was successful
-    assert success is True
+    # Check that the operation was successful but no file was created
+    assert new_file is False
 
     # Read the updated config
     with open(file_path) as f:
