@@ -106,7 +106,7 @@ name: Cleanup github runner caches on closed pull requests
 on:
   pull_request:
     types:
-      - closed
+    - closed
 
 jobs:
   cleanup:
@@ -143,18 +143,14 @@ def read_yaml_file(file_path: str) -> dict[str, Any]:
     Returns:
         Dict containing the parsed YAML content
     """
-    try:
-        yaml = YAML()
-        yaml.preserve_quotes = True
+    yaml = YAML()
+    yaml.preserve_quotes = True
 
-        if os.path.exists(file_path):
-            with open(file_path) as f:
-                content = yaml.load(f) or {}
-                return content
-        return {}
-    except Exception as e:
-        error_logger.error(f"Error reading YAML file {file_path}: {e}")
-        return {}
+    if os.path.exists(file_path):
+        with open(file_path) as f:
+            content = yaml.load(f) or {}
+            return content
+    return {}
 
 
 def write_yaml_file(file_path: str, content: dict) -> bool:
@@ -167,27 +163,24 @@ def write_yaml_file(file_path: str, content: dict) -> bool:
         content: Content to write to the file
 
     Returns:
-        True if successful, False otherwise
+        True if the file was created, False if it already existed even if it was modified
     """
-    try:
-        # Configure YAML formatting to match .yamlfmt.yaml
-        yaml = YAML()
-        yaml.preserve_quotes = True
-        # Basic formatter settings from .yamlfmt.yaml
-        yaml.indent(mapping=2, sequence=4, offset=2)  # indentless_arrays: true
-        yaml.width = 88
-        yaml.map_indent = 2
-        # Ensure compatibility with PyYAML
-        yaml.default_flow_style = False
+    # Configure YAML formatting to match .yamlfmt.yaml
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    # Basic formatter settings from .yamlfmt.yaml
+    yaml.indent(mapping=2, sequence=4, offset=2)  # indentless_arrays: true
+    yaml.width = 88
+    yaml.map_indent = 2
+    # Ensure compatibility with PyYAML
+    yaml.default_flow_style = False
+    file_created = not os.path.exists(file_path)
 
-        # Write the content to the file
-        logger.info(f"Writing changes to {file_path}")
-        with open(file_path, "w") as f:
-            yaml.dump(content, f)
-        return True
-    except Exception as e:
-        error_logger.error(f"Error writing YAML file {file_path}: {e}")
-        return False
+    # Write the content to the file
+    logger.info(f"Writing changes to {file_path}")
+    with open(file_path, "w") as f:
+        yaml.dump(content, f)
+    return file_created
 
 
 def ensure_file_exists(file_path: str, default_content: str) -> bool:
@@ -201,17 +194,14 @@ def ensure_file_exists(file_path: str, default_content: str) -> bool:
         default_content: Default content for the file if it doesn't exist
 
     Returns:
-        True if successful, False otherwise
+        True we created the file, False if it already existed and was left unchanged
     """
-    try:
-        if not os.path.exists(file_path):
-            logger.info(f"Creating {file_path} with default content")
-            with open(file_path, "w") as f:
-                f.write(default_content)
+    if not os.path.exists(file_path):
+        logger.info(f"Creating {file_path} with default content")
+        with open(file_path, "w") as f:
+            f.write(default_content)
         return True
-    except Exception as e:
-        error_logger.error(f"Error ensuring file {file_path} exists: {e}")
-        return False
+    return False
 
 
 def add_hooks_to_repos(
@@ -295,13 +285,14 @@ def ensure_pre_commit_config(config_path: str) -> bool:
         config_path: Path to the pre-commit config file
 
     Returns:
-        True if successful, False otherwise
+        True if the file was created, False if it already existed even if it was modified
     """
     try:
+        file_exists = os.path.exists(config_path)
         # Read the current config
         config = read_yaml_file(config_path)
 
-        # Initialize config if it doesn't exist
+        # Initialise config if it doesn't exist
         if not config:
             config = {
                 "repos": [],
@@ -342,34 +333,39 @@ def ensure_pre_commit_config(config_path: str) -> bool:
         # Write the updated config
         if mutated:
             return write_yaml_file(config_path, config)
-        return True
+        return not file_exists
 
     except Exception as e:
-        error_logger.error(f"Error ensuring pre-commit config: {e}")
-        return False
+        raise Exception("Error ensuring pre-commit config") from e
 
 
 def main() -> None:
     """Ensure that a baseline set of pre-commit hooks are enabled in the repository."""
-    success = True
+    new_files = False
 
-    # Ensure required files exist
-    success = ensure_file_exists(".editorconfig", DEFAULT_EDITORCONFIG) and success
-    success = ensure_file_exists(".yamlfmt.yaml", DEFAULT_YAMLFMT) and success
-    success = ensure_file_exists(".gitignore", DEFAULT_GITIGNORE) and success
-
-    if os.path.exists(".github/workflows"):
-        success = (
-            ensure_file_exists(
-                ".github/workflows/cleanup.yml", DEFAULT_ACTIONS_CACHE_CLEANUP
-            )
-            and success
+    try:
+        # Ensure required files exist
+        new_files = (
+            ensure_file_exists(".editorconfig", DEFAULT_EDITORCONFIG) or new_files
         )
+        new_files = ensure_file_exists(".yamlfmt.yaml", DEFAULT_YAMLFMT) or new_files
+        new_files = ensure_file_exists(".gitignore", DEFAULT_GITIGNORE) or new_files
 
-    # Ensure pre-commit config has required hooks
-    success = ensure_pre_commit_config(".pre-commit-config.yaml") and success
+        if os.path.exists(".github/workflows"):
+            new_files = (
+                ensure_file_exists(
+                    ".github/workflows/cleanup.yml", DEFAULT_ACTIONS_CACHE_CLEANUP
+                )
+                or new_files
+            )
 
-    if not success:
+        # Ensure pre-commit config has required hooks
+        new_files = ensure_pre_commit_config(".pre-commit-config.yaml") or new_files
+    except Exception:
+        error_logger.error("Error running init hooks", exc_info=True)
+        sys.exit(2)
+
+    if new_files:
         sys.exit(1)
 
 

@@ -8,3 +8,6 @@ ij_yaml_indent_sequence_value = false
 
 [*.md]
 indent_size = unset
+
+[*.py]
+indent_size = 4
