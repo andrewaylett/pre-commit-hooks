@@ -100,6 +100,39 @@ DEFAULT_GITIGNORE = """*~
 .*.swp
 """
 
+# https://docs.github.com/en/actions/how-tos/managing-workflow-runs-and-deployments/managing-workflow-runs/manage-caches
+DEFAULT_ACTIONS_CACHE_CLEANUP = """
+name: Cleanup github runner caches on closed pull requests
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+    - name: Cleanup
+      run: |
+        echo "Fetching list of cache keys"
+        cacheKeysForPR=$(gh cache list --ref "$BRANCH" --limit 100 --json id --jq '.[].id')
+
+        ## Setting this to not fail the workflow while deleting cache keys.
+        set +e
+        echo "Deleting caches..."
+        for cacheKey in $cacheKeysForPR
+        do
+            gh cache delete "$cacheKey"
+        done
+        echo "Done"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_REPO: ${{ github.repository }}
+        BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
+""".lstrip()
+
 
 def read_yaml_file(file_path: str) -> dict[str, Any]:
     """Read and parse a YAML file.
@@ -324,6 +357,14 @@ def main() -> None:
     success = ensure_file_exists(".editorconfig", DEFAULT_EDITORCONFIG) and success
     success = ensure_file_exists(".yamlfmt.yaml", DEFAULT_YAMLFMT) and success
     success = ensure_file_exists(".gitignore", DEFAULT_GITIGNORE) and success
+
+    if os.path.exists(".github/workflows"):
+        success = (
+            ensure_file_exists(
+                ".github/workflows/cleanup.yml", DEFAULT_ACTIONS_CACHE_CLEANUP
+            )
+            and success
+        )
 
     # Ensure pre-commit config has required hooks
     success = ensure_pre_commit_config(".pre-commit-config.yaml") and success
