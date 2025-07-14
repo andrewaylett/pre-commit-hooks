@@ -3,6 +3,7 @@
   description: Find files with cog markers and run cog on them
   entry: pre-commit-cog
   language: python
+  language_version: python3.12
   pass_filenames: false
   always_run: true
 - id: init-hooks
@@ -10,6 +11,7 @@
   description: Ensures that a baseline set of pre-commit hooks are enabled in the repository
   entry: pre-commit-init-hooks
   language: python
+  language_version: python3.12
   pass_filenames: false
   always_run: true
 - id: uv-run
@@ -17,5 +19,6 @@
   description: Executes a project command using uv run
   entry: pre-commit-uv-run
   language: python
+  language_version: python3.12
   pass_filenames: false
   always_run: true
