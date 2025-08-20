@@ -22,3 +22,16 @@
   language_version: python3.12
   pass_filenames: false
   always_run: true
+- id: cargo-clippy
+  name: Cargo Clippy
+  description: Runs `cargo clippy` with stable Rust
+  entry: /usr/local/cargo/bin/cargo clippy
+  language: docker
+  pass_filenames: false
+  types: [rust]
+- id: cargo-fmt
+  name: Cargo Format
+  description: Runs `cargo fmt` with stable Rust
+  entry: /usr/local/cargo/bin/cargo fmt --
+  language: docker
+  types: [rust]
