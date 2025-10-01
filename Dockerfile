@@ -1,4 +1,4 @@
-FROM docker.io/rust:1.90.0-slim@sha256:40d4ee109c7e740b3a242f20cc3b5790af9c725828b86a458765f192391a6a4a
+FROM docker.io/rust:1.90.0-slim@sha256:1219c0b5980e8310eb8e08a7fec9e2159ffc9f166cc9999ddb13604c43cd0eb6
 
 RUN rustup component add clippy rustfmt
 
