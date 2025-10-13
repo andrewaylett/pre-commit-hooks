@@ -24,7 +24,7 @@ DEFAULT_REPO_VERSIONS = {
     "https://github.com/google/yamlfmt": "v0.17.2",
     "https://github.com/rhysd/actionlint": "v1.7.8",
     "https://github.com/editorconfig-checker/editorconfig-checker.python": "3.4.0",
-    "https://github.com/python-jsonschema/check-jsonschema": "0.34.0",
+    "https://github.com/python-jsonschema/check-jsonschema": "0.34.1",
     "https://github.com/andrewaylett/pre-commit-hooks": "v0.7.0",
     "https://github.com/renovatebot/pre-commit-hooks": "41.146.0",
 }
