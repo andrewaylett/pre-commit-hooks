@@ -21,7 +21,7 @@ class PreCommitRepo(TypedDict):
 # Default versions for repositories
 DEFAULT_REPO_VERSIONS = {
     "https://github.com/pre-commit/pre-commit-hooks": "v6.0.0",
-    "https://github.com/google/yamlfmt": "v0.19.0",
+    "https://github.com/google/yamlfmt": "v0.20.0",
     "https://github.com/rhysd/actionlint": "v1.7.8",
     "https://github.com/editorconfig-checker/editorconfig-checker.python": "3.4.0",
     "https://github.com/python-jsonschema/check-jsonschema": "0.34.1",
