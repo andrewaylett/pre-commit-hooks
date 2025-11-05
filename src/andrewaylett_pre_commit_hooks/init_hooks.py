@@ -26,7 +26,7 @@ DEFAULT_REPO_VERSIONS = {
     "https://github.com/editorconfig-checker/editorconfig-checker.python": "3.4.1",
     "https://github.com/python-jsonschema/check-jsonschema": "0.34.1",
     "https://github.com/andrewaylett/pre-commit-hooks": "v0.7.0",
-    "https://github.com/renovatebot/pre-commit-hooks": "41.171.7",
+    "https://github.com/renovatebot/pre-commit-hooks": "41.172.0",
 }
 
 # Default hooks that should be enabled
