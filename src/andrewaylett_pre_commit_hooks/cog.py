@@ -65,7 +65,7 @@ def run_cog_on_files(files: set[str]) -> bool:
 
     # Set options equivalent to command-line flags
     cog_instance.options.replace = True  # -r: replace in-place
-    cog_instance.options.checksum = True  # -c: checksum
+    cog_instance.options.hash_output = True  # -c: checksum
     cog_instance.options.verbosity = 3
 
     # Add imports to globals (equivalent to -p option)

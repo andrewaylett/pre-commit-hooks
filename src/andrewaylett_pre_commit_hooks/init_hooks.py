@@ -10,12 +10,13 @@ from andrewaylett_pre_commit_hooks import error_logger, logger
 class PreCommitHook(TypedDict):
     id: str
     args: NotRequired[list[str]]
+    stages: NotRequired[list[str]]
 
 
 class PreCommitRepo(TypedDict):
     repo: str
     rev: str
-    hooks: list[PreCommitHook]
+    hooks: NotRequired[list[PreCommitHook]]
 
 
 # Default versions for repositories
@@ -65,7 +66,7 @@ GITHUB_ACTIONS_HOOKS = {
 }
 
 # Hooks that should be enabled only if renovate.json file exists
-RENOVATE_HOOKS = {
+RENOVATE_HOOKS: dict[str, list[str | PreCommitHook]] = {
     "https://github.com/python-jsonschema/check-jsonschema": [
         "check-renovate",
     ],
@@ -239,6 +240,7 @@ def add_hooks_to_repos(
             # Add missing hooks
             for hook in hooks:
                 # Handle both string hook IDs and dictionaries with id and args
+                hook_config: PreCommitHook
                 if isinstance(hook, str):
                     hook_id = hook
                     hook_config = {"id": hook_id}

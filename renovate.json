@@ -4,6 +4,18 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
+        ".pre-commit-hooks.yaml"
+      ],
+      "matchStrings": [
+        "language_version: python(?<currentValue>3\\.\\d+)$"
+      ],
+      "datasourceTemplate": "python-version",
+      "versioningTemplate": "python",
+      "depNameTemplate": "python"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
         "src/andrewaylett_pre_commit_hooks/init_hooks.py"
       ],
       "matchStrings": [
