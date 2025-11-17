@@ -2,7 +2,11 @@
 
 import pytest
 
-from andrewaylett_pre_commit_hooks.init_hooks import add_hooks_to_repos
+from andrewaylett_pre_commit_hooks.init_hooks import (
+    PreCommitHook,
+    PreCommitRepo,
+    add_hooks_to_repos,
+)
 
 # Mark all tests in this module to change directory
 pytestmark = pytest.mark.change_dir
@@ -11,7 +15,7 @@ pytestmark = pytest.mark.change_dir
 def test_add_hooks_to_empty_repos():
     """Test adding hooks to empty repos list."""
     # Setup
-    repos = []
+    repos: list[PreCommitRepo] = []
     existing_repos = {}
     hooks_dict = {"https://github.com/example/repo": ["hook1", "hook2"]}
 
@@ -31,7 +35,7 @@ def test_add_hooks_to_empty_repos():
 def test_add_hooks_to_existing_repo():
     """Test adding hooks to an existing repository."""
     # Setup
-    repos = [
+    repos: list[PreCommitRepo] = [
         {
             "repo": "https://github.com/example/repo",
             "rev": "main",
@@ -59,7 +63,7 @@ def test_add_hooks_with_dict_format():
     # Setup
     repos = []
     existing_repos = {}
-    hooks_dict = {
+    hooks_dict: dict[str, list[str | PreCommitHook]] = {
         "https://github.com/example/repo": [
             {"id": "hook1", "args": ["--arg1", "--arg2"]},
             {"id": "hook2", "stages": ["commit"]},
@@ -84,7 +88,7 @@ def test_add_hooks_mixed_format():
     # Setup
     repos = []
     existing_repos = {}
-    hooks_dict = {
+    hooks_dict: dict[str, list[str | PreCommitHook]] = {
         "https://github.com/example/repo": [
             "simple-hook",
             {"id": "complex-hook", "args": ["--arg"]},
@@ -106,7 +110,7 @@ def test_add_hooks_mixed_format():
 def test_add_hooks_to_repo_without_hooks():
     """Test adding hooks to a repository that exists but has no hooks."""
     # Setup
-    repos = [
+    repos: list[PreCommitRepo] = [
         {
             "repo": "https://github.com/example/repo",
             "rev": "main",
@@ -131,7 +135,7 @@ def test_add_hooks_to_repo_without_hooks():
 def test_add_hooks_no_mutation_needed():
     """Test that no mutation occurs when all hooks already exist."""
     # Setup
-    repos = [
+    repos: list[PreCommitRepo] = [
         {
             "repo": "https://github.com/example/repo",
             "rev": "main",

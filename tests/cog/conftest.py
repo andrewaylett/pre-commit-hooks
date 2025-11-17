@@ -69,7 +69,7 @@ def example_passing():
     # cog.outl("    print('Generated Passing')")
     # ]]]
     print('Generated Passing')
-    # [[[end]]]
+    # [[[end]]] (sum: BwGU0M3usK)
     pass
 """.replace("[ [ [", "[[[")
 
