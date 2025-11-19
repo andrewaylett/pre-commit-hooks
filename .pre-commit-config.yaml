@@ -40,7 +40,7 @@ repos:
   - id: renovate-config-validator
     args: [--strict]
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.9.9
+  rev: 0.9.10
   hooks:
   - id: uv-lock
 - repo: https://github.com/andrewaylett/pre-commit-hooks
