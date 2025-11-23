@@ -5,7 +5,7 @@ Add this repo to your `.pre-commit-config.yaml`:
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.7.0
+  rev: v0.7.1
   hooks:
     - id: cog
     - id: init-hooks
@@ -18,7 +18,7 @@ repos:
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.7.0
+  rev: v0.7.1
   hooks:
     - id: cog
 ```
@@ -37,7 +37,7 @@ cog -r -c -p "import subprocess as sp, re, os, sys, pathlib as pl, cog" README.m
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.7.0
+  rev: v0.7.1
   hooks:
     - id: uv-run
       name: Run pytest
@@ -71,7 +71,7 @@ to download and use `virtualenv` and `uv` every time it's run.
 ```yaml
 repos:
 - repo: https://github.com/andrewaylett/pre-commit-hooks
-  rev: v0.7.0
+  rev: v0.7.1
   hooks:
     - id: init-hooks
 ```
