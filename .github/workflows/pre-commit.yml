@@ -14,4 +14,4 @@ jobs:
     steps:
     - name: Check out
       uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-    - uses: andrewaylett/pre-commit-action@88b1e05ac245651ed11dae655306f1ea5ad2df5e # v4
+    - uses: andrewaylett/pre-commit-action@935c7cd79f5ccbf4e3d058a90750b5b34500ecff # v4
