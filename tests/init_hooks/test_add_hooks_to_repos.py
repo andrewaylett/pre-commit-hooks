@@ -3,6 +3,7 @@
 import pytest
 
 from andrewaylett_pre_commit_hooks.init_hooks import (
+    HookDict,
     PreCommitHook,
     PreCommitRepo,
     add_hooks_to_repos,
@@ -17,7 +18,7 @@ def test_add_hooks_to_empty_repos():
     # Setup
     repos: list[PreCommitRepo] = []
     existing_repos = {}
-    hooks_dict = {"https://github.com/example/repo": ["hook1", "hook2"]}
+    hooks_dict: HookDict = {"https://github.com/example/repo": ["hook1", "hook2"]}
 
     # Execute
     result = add_hooks_to_repos(repos, existing_repos, hooks_dict)
@@ -43,7 +44,9 @@ def test_add_hooks_to_existing_repo():
         }
     ]
     existing_repos = {"https://github.com/example/repo": repos[0]}
-    hooks_dict = {"https://github.com/example/repo": ["new-hook", "another-hook"]}
+    hooks_dict: HookDict = {
+        "https://github.com/example/repo": ["new-hook", "another-hook"]
+    }
 
     # Execute
     result = add_hooks_to_repos(repos, existing_repos, hooks_dict)
@@ -118,7 +121,7 @@ def test_add_hooks_to_repo_without_hooks():
         }
     ]
     existing_repos = {"https://github.com/example/repo": repos[0]}
-    hooks_dict = {"https://github.com/example/repo": ["hook1", "hook2"]}
+    hooks_dict: HookDict = {"https://github.com/example/repo": ["hook1", "hook2"]}
 
     # Execute
     result = add_hooks_to_repos(repos, existing_repos, hooks_dict)
@@ -143,7 +146,7 @@ def test_add_hooks_no_mutation_needed():
         }
     ]
     existing_repos = {"https://github.com/example/repo": repos[0]}
-    hooks_dict = {"https://github.com/example/repo": ["hook1", "hook2"]}
+    hooks_dict: HookDict = {"https://github.com/example/repo": ["hook1", "hook2"]}
 
     # Execute
     result = add_hooks_to_repos(repos, existing_repos, hooks_dict)
@@ -159,7 +162,7 @@ def test_add_hooks_with_hook_type():
     # Setup
     repos = []
     existing_repos = {}
-    hooks_dict = {"https://github.com/example/repo": ["hook1"]}
+    hooks_dict: HookDict = {"https://github.com/example/repo": ["hook1"]}
 
     # Execute
     result = add_hooks_to_repos(repos, existing_repos, hooks_dict, hook_type="test")
