@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Any, NotRequired, TypedDict
+from typing import Any, NotRequired, TypeAlias, TypedDict
 
 from ruamel.yaml import YAML
 
@@ -19,6 +19,9 @@ class PreCommitRepo(TypedDict):
     hooks: NotRequired[list[PreCommitHook]]
 
 
+HookDict: TypeAlias = dict[str, list[str | PreCommitHook]]
+
+
 # Default versions for repositories
 DEFAULT_REPO_VERSIONS = {
     "https://github.com/pre-commit/pre-commit-hooks": "v6.0.0",
@@ -31,7 +34,7 @@ DEFAULT_REPO_VERSIONS = {
 }
 
 # Default hooks that should be enabled
-DEFAULT_HOOKS = {
+DEFAULT_HOOKS: HookDict = {
     "https://github.com/pre-commit/pre-commit-hooks": [
         "trailing-whitespace",
         "end-of-file-fixer",
@@ -56,7 +59,7 @@ DEFAULT_HOOKS = {
 }
 
 # Hooks that should be enabled only if .github/workflows directory exists
-GITHUB_ACTIONS_HOOKS = {
+GITHUB_ACTIONS_HOOKS: HookDict = {
     "https://github.com/rhysd/actionlint": [
         "actionlint",
     ],
@@ -66,12 +69,12 @@ GITHUB_ACTIONS_HOOKS = {
 }
 
 # Hooks that should be enabled only if renovate.json file exists
-RENOVATE_HOOKS: dict[str, list[str | PreCommitHook]] = {
+RENOVATE_HOOKS: HookDict = {
     "https://github.com/python-jsonschema/check-jsonschema": [
         "check-renovate",
     ],
     "https://github.com/renovatebot/pre-commit-hooks": [
-        {"id": "renovate-config-validator", "args": ["--strict"]},
+        PreCommitHook(id="renovate-config-validator", args=["--strict"]),
     ],
 }
 
@@ -208,7 +211,7 @@ def ensure_file_exists(file_path: str, default_content: str) -> bool:
 def add_hooks_to_repos(
     repos: list[PreCommitRepo],
     existing_repos: dict[str, PreCommitRepo],
-    hooks_dict: dict[str, list[str | PreCommitHook]],
+    hooks_dict: HookDict,
     hook_type: str = "",
 ) -> bool:
     """Add hooks to repositories.
@@ -243,7 +246,7 @@ def add_hooks_to_repos(
                 hook_config: PreCommitHook
                 if isinstance(hook, str):
                     hook_id = hook
-                    hook_config = {"id": hook_id}
+                    hook_config = PreCommitHook(id=hook_id)
                 else:
                     hook_id = hook["id"]
                     hook_config = hook.copy()
