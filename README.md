@@ -58,7 +58,7 @@ This is roughly equivalent to this local hook:
     language: python
     entry: uv run pytest --verbose
     additional_dependencies:
-    - "uv==0.11.10"
+    - "uv==0.11.11"
     pass_filenames: false
     always_run: true
 ```
