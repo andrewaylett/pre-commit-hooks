@@ -241,7 +241,9 @@ def test_github_actions_hooks_with_workflows_dir(temp_dir, empty_pre_commit_conf
         )
         assert repo is not None, f"Repository {repo_url} not found"
         hook_ids = [hook["id"] for hook in repo["hooks"]]
-        for hook_id in hooks:
+        for hook in hooks:
+            hook_id = hook if isinstance(hook, str) else hook["id"]
+
             assert hook_id in hook_ids, (
                 f"Hook {hook_id} not found in repository {repo_url}"
             )

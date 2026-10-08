@@ -31,6 +31,7 @@ DEFAULT_REPO_VERSIONS = {
     "https://github.com/python-jsonschema/check-jsonschema": "0.38.2",
     "https://github.com/andrewaylett/pre-commit-hooks": "v0.7.2",
     "https://github.com/renovatebot/pre-commit-hooks": "44.148.1",
+    "https://github.com/zizmorcore/zizmor-pre-commit": "v1.30.1",
 }
 
 # Default hooks that should be enabled
@@ -62,6 +63,9 @@ DEFAULT_HOOKS: HookDict = {
 GITHUB_ACTIONS_HOOKS: HookDict = {
     "https://github.com/rhysd/actionlint": [
         "actionlint",
+    ],
+    "https://github.com/zizmorcore/zizmor-pre-commit": [
+        PreCommitHook(id="zizmor", args=["--no-progress", "--fix=all"]),
     ],
     "https://github.com/python-jsonschema/check-jsonschema": [
         "check-github-workflows",
