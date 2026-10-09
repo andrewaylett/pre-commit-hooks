@@ -22,11 +22,15 @@ class PreCommitRepo(TypedDict):
 HookDict: TypeAlias = dict[str, list[str | PreCommitHook]]
 
 
+# actionlint is effectively unmaintained: jactionlint is an active replacement.
+ACTIONLINT_REPO = "https://github.com/rhysd/actionlint"
+JACTIONLINT_REPO = "https://github.com/jdx/jactionlint"
+
 # Default versions for repositories
 DEFAULT_REPO_VERSIONS = {
     "https://github.com/pre-commit/pre-commit-hooks": "v6.0.0",
     "https://github.com/google/yamlfmt": "v0.21.0",
-    "https://github.com/rhysd/actionlint": "v1.7.12",
+    "https://github.com/jdx/jactionlint": "v1.8.2",
     "https://github.com/editorconfig-checker/editorconfig-checker.python": "3.11.1",
     "https://github.com/python-jsonschema/check-jsonschema": "0.38.2",
     "https://github.com/andrewaylett/pre-commit-hooks": "v0.8.0",
@@ -61,8 +65,8 @@ DEFAULT_HOOKS: HookDict = {
 
 # Hooks that should be enabled only if .github/workflows directory exists
 GITHUB_ACTIONS_HOOKS: HookDict = {
-    "https://github.com/rhysd/actionlint": [
-        "actionlint",
+    JACTIONLINT_REPO: [
+        "jactionlint",
     ],
     "https://github.com/zizmorcore/zizmor-pre-commit": [
         PreCommitHook(id="zizmor", args=["--no-progress", "--fix=all"]),
@@ -287,6 +291,37 @@ def add_hooks_to_repos(
     return mutated
 
 
+def migrate_actionlint(
+    repos: list[PreCommitRepo], existing_repos: dict[str, PreCommitRepo]
+) -> bool:
+    """Replace actionlint with jactionlint, keeping any other configuration.
+
+    Hook ids map directly (actionlint, actionlint-docker, ...) onto their
+    jactionlint equivalents.  If jactionlint is already configured we just
+    drop the old repository rather than ending up with two linters.
+
+    Returns:
+        True if the repos list was mutated, False otherwise
+    """
+    old = existing_repos.get(ACTIONLINT_REPO)
+    if old is None:
+        return False
+
+    logger.info(f"Migrating {ACTIONLINT_REPO} to {JACTIONLINT_REPO}")
+    new = existing_repos.get(JACTIONLINT_REPO)
+    if new is None:
+        old["repo"] = JACTIONLINT_REPO
+        old["rev"] = DEFAULT_REPO_VERSIONS[JACTIONLINT_REPO]
+        for hook in old.get("hooks", []):
+            if hook.get("id", "").startswith("actionlint"):
+                hook["id"] = "j" + hook["id"]
+        existing_repos[JACTIONLINT_REPO] = old
+    else:
+        repos.remove(old)
+    del existing_repos[ACTIONLINT_REPO]
+    return True
+
+
 def ensure_pre_commit_config(config_path: str) -> bool:
     """Ensure the pre-commit config file exists and has the required hooks.
 
@@ -319,6 +354,8 @@ def ensure_pre_commit_config(config_path: str) -> bool:
 
         # Track mutations
         mutated = False
+
+        mutated = migrate_actionlint(repos, existing_repos) or mutated
 
         # Add missing repositories and hooks from DEFAULT_HOOKS
         mutated = add_hooks_to_repos(repos, existing_repos, DEFAULT_HOOKS) or mutated
