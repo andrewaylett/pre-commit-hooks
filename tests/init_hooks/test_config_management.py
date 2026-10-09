@@ -370,3 +370,40 @@ def test_renovate_hooks_without_renovate_json(temp_dir, empty_pre_commit_config)
                 assert hook_id not in hook_ids, (
                     f"Hook {hook_id} found in repository {repo_url}"
                 )
+
+
+def test_actionlint_migrated_to_jactionlint(temp_dir):
+    """An existing actionlint configuration is replaced by jactionlint."""
+    from andrewaylett_pre_commit_hooks.init_hooks import (
+        ACTIONLINT_REPO,
+        DEFAULT_REPO_VERSIONS,
+        JACTIONLINT_REPO,
+    )
+
+    file_path = Path(temp_dir) / ".pre-commit-config.yaml"
+    file_path.write_text(
+        f"repos:\n- repo: {ACTIONLINT_REPO}\n  rev: v1.7.0\n  hooks:\n"
+        "  - id: actionlint\n"
+    )
+    Path(".github/workflows").mkdir(parents=True)
+
+    ensure_pre_commit_config(str(file_path))
+
+    repos = yaml.safe_load(file_path.read_text())["repos"]
+    assert not [r for r in repos if r["repo"] == ACTIONLINT_REPO]
+    (new,) = [r for r in repos if r["repo"] == JACTIONLINT_REPO]
+    assert new["rev"] == DEFAULT_REPO_VERSIONS[JACTIONLINT_REPO]
+    assert [h["id"] for h in new["hooks"]] == ["jactionlint"]
+
+
+def test_jactionlint_added_when_neither_present(temp_dir):
+    """jactionlint is installed if no actionlint variant is configured."""
+    from andrewaylett_pre_commit_hooks.init_hooks import JACTIONLINT_REPO
+
+    file_path = Path(temp_dir) / ".pre-commit-config.yaml"
+    Path(".github/workflows").mkdir(parents=True)
+
+    ensure_pre_commit_config(str(file_path))
+
+    repos = yaml.safe_load(file_path.read_text())["repos"]
+    assert any(r["repo"] == JACTIONLINT_REPO for r in repos)

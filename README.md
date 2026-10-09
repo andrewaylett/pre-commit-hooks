@@ -94,7 +94,7 @@ along with their support files.
   * editorconfig-checker
   * init-hooks
   * If `.github/workflows` directory exists:
-    * actionlint
+    * jactionlint (an existing actionlint configuration is migrated to it)
     * check-github-workflows
   * If `renovate.json` file exists:
     * check-renovate
