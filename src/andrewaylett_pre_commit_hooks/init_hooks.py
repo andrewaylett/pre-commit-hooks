@@ -33,7 +33,7 @@ DEFAULT_REPO_VERSIONS = {
     "https://github.com/jdx/jactionlint": "v1.8.2",
     "https://github.com/editorconfig-checker/editorconfig-checker.python": "3.11.1",
     "https://github.com/python-jsonschema/check-jsonschema": "0.38.2",
-    "https://github.com/andrewaylett/pre-commit-hooks": "v0.8.0",
+    "https://github.com/andrewaylett/pre-commit-hooks": "v0.9.0",
     "https://github.com/renovatebot/pre-commit-hooks": "44.149.2",
     "https://github.com/zizmorcore/zizmor-pre-commit": "v1.30.1",
 }
