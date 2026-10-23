@@ -35,7 +35,7 @@ DEFAULT_REPO_VERSIONS = {
     "https://github.com/python-jsonschema/check-jsonschema": "0.38.2",
     "https://github.com/andrewaylett/pre-commit-hooks": "v0.9.0",
     "https://github.com/renovatebot/pre-commit-hooks": "44.181.0",
-    "https://github.com/zizmorcore/zizmor-pre-commit": "v1.30.1",
+    "https://github.com/zizmorcore/zizmor-pre-commit": "v1.31.1",
 }
 
 # Default hooks that should be enabled
